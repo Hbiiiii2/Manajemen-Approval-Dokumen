@@ -1,37 +1,94 @@
 @extends('layouts.user_type.auth')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" id="dashboard-statistics">
   @if(auth()->user()->role->name == 'admin')
   <div class="row mb-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h6>Filter Dashboard</h6>
-        </div>
-        <div class="card-body">
-          <form method="GET" action="{{ route('dashboard') }}" class="row">
-            <div class="col-md-4">
-              <label for="division_filter" class="form-label">Filter Divisi</label>
-              <select class="form-control" id="division_filter" name="division_filter">
-                <option value="">Semua Divisi</option>
-                @foreach(\App\Models\Division::where('status', 'active')->get() as $division)
-                  <option value="{{ $division->id }}" {{ request('division_filter') == $division->id ? 'selected' : '' }}>
-                    {{ $division->name }}
-                  </option>
-                @endforeach
-              </select>
-            </div>
-            <div class="col-md-4 d-flex align-items-end">
-              <button type="submit" class="btn btn-primary me-2">Filter</button>
-              <a href="{{ route('dashboard') }}" class="btn btn-secondary">Reset</a>
-            </div>
-          </form>
-        </div>
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-0">Dashboard Analytics</h4>
+      </div>
+      <div>
+        <a href="{{ route('dashboard.export-pdf', request()->all()) }}" class="btn btn-outline-danger" target="_blank">
+          <i class="fa fa-file-pdf"></i> Export PDF
+        </a>
       </div>
     </div>
   </div>
   @endif
+
+  <!-- KPI Cards -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="text-xs text-secondary mb-1">Approval Rate</div>
+          <h3 class="mb-0">{{ $kpi['approval_rate'] }}%</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="text-xs text-secondary mb-1">Rata-rata Waktu Approval</div>
+          <h3 class="mb-0">{{ $kpi['avg_approval_time'] < 1 ? round($kpi['avg_approval_time']*60) . ' menit' : number_format($kpi['avg_approval_time'],2) . ' jam' }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="text-xs text-secondary mb-1">Total Approval</div>
+          <h3 class="mb-0">{{ $kpi['total_approval'] }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="text-xs text-secondary mb-1">Total Divisi</div>
+          <h3 class="mb-0">{{ $kpi['total_division'] }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Analytics -->
+  <div class="row mt-4">
+    <div class="col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6>Grafik Dokumen per Bulan</h6>
+          {{-- <pre style="font-size:10px;max-height:100px;overflow:auto;">{{ json_encode($chartData) }}</pre> --}}
+        </div>
+        <div class="card-body">
+          <canvas id="documentChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6>Dokumen per Divisi</h6>
+          {{-- <pre style="font-size:10px;max-height:100px;overflow:auto;">{{ json_encode($chartDivision) }}</pre> --}}
+        </div>
+        <div class="card-body">
+          <canvas id="divisionChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6>Rata-rata Waktu Approval per Bulan</h6>
+          {{-- <pre style="font-size:10px;max-height:100px;overflow:auto;">{{ json_encode($chartApprovalTime) }}</pre> --}}
+        </div>
+        <div class="card-body">
+          <canvas id="approvalTimeChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="row">
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
@@ -384,7 +441,7 @@
   </div>
   @endif
 
-  @if($chartData->count() > 0)
+  {{-- @if($chartData->count() > 0)
   <!-- Chart Statistik -->
   <div class="row mt-4">
     <div class="col-12">
@@ -404,29 +461,44 @@
       </div>
     </div>
   </div>
-  @endif
+  @endif --}}
+
+  <!-- Statistik Dokumen (2025) -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h6>Statistik Dokumen ({{ date('Y') }})</h6>
+          <p class="text-sm mb-0">
+            <i class="ni ni-chart-bar-32 text-info"></i>
+            <span class="font-weight-bold">Grafik dokumen per bulan</span>
+          </p>
+        </div>
+        <div class="card-body">
+          <canvas id="documentChart2025" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 @if($chartData->count() > 0)
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  var ctx = document.getElementById('documentChart').getContext('2d');
+  // Grafik Dokumen per Bulan
   var chartData = @json($chartData);
-  
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  var data = new Array(12).fill(0);
-  
+  var dataArr = new Array(12).fill(0);
   chartData.forEach(function(item) {
-    data[item.month - 1] = item.count;
+    dataArr[item.month-1] = item.count;
   });
-  
-  new Chart(ctx, {
+  new Chart(document.getElementById('documentChart').getContext('2d'), {
     type: 'line',
     data: {
       labels: months,
       datasets: [{
         label: 'Jumlah Dokumen',
-        data: data,
+        data: dataArr,
         borderColor: '#5e72e4',
         backgroundColor: 'rgba(94, 114, 228, 0.1)',
         borderWidth: 2,
@@ -434,23 +506,73 @@ document.addEventListener('DOMContentLoaded', function() {
         tension: 0.4
       }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            stepSize: 1
-          }
-        }
-      }
-    }
+    options: {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+
+  // Dokumen per Divisi
+  var chartDivision = @json($chartDivision);
+  var divisionLabels = chartDivision.map(function(item){return item.division ? item.division.name : '-';});
+  var divisionCounts = chartDivision.map(function(item){return item.count;});
+  new Chart(document.getElementById('divisionChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: divisionLabels,
+      datasets: [{
+        label: 'Jumlah Dokumen',
+        data: divisionCounts,
+        backgroundColor: '#2dce89',
+        borderColor: '#2dce89',
+        borderWidth: 1
+      }]
+    },
+    options: {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+
+  // Rata-rata Waktu Approval per Bulan
+  var chartApprovalTime = @json($chartApprovalTime);
+  var approvalTimeArr = new Array(12).fill(0);
+  chartApprovalTime.forEach(function(item){
+    approvalTimeArr[item.month-1] = item.avg_time ? (item.avg_time/3600).toFixed(2) : 0;
+  });
+  new Chart(document.getElementById('approvalTimeChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Rata-rata Jam',
+        data: approvalTimeArr,
+        borderColor: '#f5365c',
+        backgroundColor: 'rgba(245,54,92,0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+
+  // Statistik Dokumen (2025)
+  var chartData2025 = @json($chartData);
+  var months2025 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var dataArr2025 = new Array(12).fill(0);
+  chartData2025.forEach(function(item) {
+    dataArr2025[item.month-1] = item.count;
+  });
+  new Chart(document.getElementById('documentChart2025').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: months2025,
+      datasets: [{
+        label: 'Jumlah Dokumen',
+        data: dataArr2025,
+        borderColor: '#36a2eb',
+        backgroundColor: 'rgba(54,162,235,0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
   });
 });
 </script>

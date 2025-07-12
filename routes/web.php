@@ -30,6 +30,7 @@ Route::get('/', function() {
 Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/export-pdf', [App\Http\Controllers\DashboardController::class, 'exportPdf'])->name('dashboard.export-pdf');
 
 	Route::get('billing', function () {
 		return view('billing');

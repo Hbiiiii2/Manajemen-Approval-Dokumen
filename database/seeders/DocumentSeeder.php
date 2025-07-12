@@ -9,6 +9,8 @@ use App\Models\DocumentType;
 use App\Models\Division;
 use App\Models\Role;
 use Faker\Factory as Faker;
+use App\Models\Approval;
+use App\Models\ApprovalLevel;
 
 class DocumentSeeder extends Seeder
 {
@@ -20,6 +22,7 @@ class DocumentSeeder extends Seeder
         $faker = Faker::create('id_ID');
         $divisions = Division::all();
         $documentTypes = DocumentType::all();
+        $approvalLevels = ApprovalLevel::all();
         
         // Get staff role by name
         $staffRole = Role::where('name', 'staff')->first();
@@ -187,17 +190,34 @@ class DocumentSeeder extends Seeder
                 $user = $divisionUsers->random();
                 $documentType = $documentTypes->random();
                 
-                Document::create([
+                $createdAt = $faker->dateTimeBetween('2025-01-01', '2025-12-31');
+                $doc = Document::create([
                     'user_id' => $user->id,
                     'division_id' => $division->id,
                     'document_type_id' => $documentType->id,
                     'title' => $title,
                     'description' => $faker->paragraph(3),
                     'file_path' => 'documents/sample.pdf', // Placeholder file path
-                    'status' => ['pending', 'approved', 'rejected'][rand(0, 2)],
-                    'created_at' => $faker->dateTimeBetween('-30 days', 'now'),
-                    'updated_at' => $faker->dateTimeBetween('-30 days', 'now'),
+                    'status' => $status = ['pending', 'approved', 'rejected'][rand(0, 2)],
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
                 ]);
+                // Tambahkan approval jika status approved/rejected
+                if (in_array($doc->status, ['approved', 'rejected'])) {
+                    $approver = $divisionUsers->random();
+                    $level = $approvalLevels->random();
+                    $approvedAt = (clone $createdAt)->modify('+'.rand(1,48).' hours');
+                    Approval::create([
+                        'document_id' => $doc->id,
+                        'user_id' => $approver->id,
+                        'level_id' => $level->id,
+                        'status' => $doc->status,
+                        'notes' => $doc->status === 'approved' ? 'Disetujui otomatis' : 'Ditolak otomatis',
+                        'approved_at' => $approvedAt,
+                        'created_at' => $createdAt,
+                        'updated_at' => $approvedAt,
+                    ]);
+                }
                 
                 $documentsCreated++;
             }
