@@ -7,7 +7,7 @@
 
 *Frontend version*: Soft UI Dashboard v1.0.0. More info at https://www.creative-tim.com/product/soft-ui-dashboard
 
-[<img src="https://s3.amazonaws.com/creativetim_bucket/products/602/original/soft-ui-dashboard-laravel.jpg" width="100%" />](https://soft-ui-dashboard-laravel.creative-tim.com/dashboard)
+[<img src="Dashboard.png" width="100%" />](https://soft-ui-dashboard-laravel.creative-tim.com/dashboard)
   
 ## Sistem Manajemen Approval Dokumen Berbasis Laravel
 Sistem manajemen dokumen yang dikembangkan dengan Laravel dan Soft UI Dashboard untuk mengelola pengajuan, approval, dan tracking dokumen dalam organisasi.
@@ -228,6 +228,11 @@ routes/
 7. **ApprovalSeeder.php** - Membuat data approval untuk dokumen yang sudah approved/rejected
 8. **TestUserSeeder.php** - Membuat user testing tambahan untuk setiap role
 
+### Admin Seeders (Baru)
+9. **AdminSeeder.php** - Membuat satu akun admin default (admin@softui.com / password)
+10. **CustomAdminSeeder.php** - Membuat multiple akun admin dengan kredensial yang dapat dikustomisasi
+11. **SingleAdminSeeder.php** - Membuat satu akun admin dengan kredensial dari environment variables
+
 ### Cara Menjalankan Seeder
 ```bash
 # Fresh installation dengan data lengkap
@@ -241,6 +246,11 @@ php artisan db:seed --class=NamaSeeder
 
 # Tambah user testing
 php artisan db:seed --class=TestUserSeeder
+
+# Admin Seeders
+php artisan db:seed --class=AdminSeeder
+php artisan db:seed --class=CustomAdminSeeder
+php artisan db:seed --class=SingleAdminSeeder
 ```
 
 ## Profile Management Features

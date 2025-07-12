@@ -17,9 +17,10 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             DivisionSeeder::class,
             ApprovalLevelSeeder::class,
-            UserSeeder::class,
+            // UserSeeder::class,
+            SimpleAdminSeeder::class,
             DocumentTypeSeeder::class,
-            DocumentSeeder::class,
+            // DocumentSeeder::class,
         ]);
     }
 }
