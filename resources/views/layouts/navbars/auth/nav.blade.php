@@ -21,29 +21,62 @@
             </div>
             </div> --}}
             <ul class="navbar-nav  justify-content-end">
-            <li class="nav-item d-flex align-items-center">
-                <div class="d-flex align-items-center me-3">
-                    @if(auth()->user()->profile_photo)
-                        <img src="{{ Storage::url(auth()->user()->profile_photo) }}" alt="Profile" class="avatar avatar-sm rounded-circle me-2" style="object-fit: cover;">
-                    @else
-                        <div class="avatar avatar-sm bg-gradient-secondary rounded-circle me-2">
-                            <i class="ni ni-single-02 text-white"></i>
-                        </div>
-                    @endif
-                    <div class="d-flex flex-column">
-                        <span class="text-sm font-weight-bold mb-0">{{ auth()->user()->name }}</span>
-                        <span class="text-xs text-secondary">{{ ucfirst(str_replace('_', ' ', auth()->user()->role->name)) }}</span>
-                        @if(auth()->user()->division)
-                        <span class="text-xs text-primary">{{ auth()->user()->division->name }}</span>
+            <li class="nav-item dropdown pe-2 d-flex align-items-center profile-dropdown">
+                <a href="javascript:;" class="nav-link text-body p-0" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="d-flex align-items-center me-3">
+                        @if(auth()->user()->profile_photo)
+                            <img src="{{ Storage::url(auth()->user()->profile_photo) }}" alt="Profile" class="avatar avatar-sm rounded-circle me-2" style="object-fit: cover;">
+                        @else
+                            <div class="avatar avatar-sm bg-gradient-secondary rounded-circle me-2">
+                                <i class="ni ni-single-02 text-white"></i>
+                            </div>
                         @endif
+                        <div class="d-flex flex-column">
+                            <span class="text-sm font-weight-bold mb-0">{{ auth()->user()->name }}</span>
+                            <span class="text-xs text-secondary">{{ ucfirst(str_replace('_', ' ', auth()->user()->role->name)) }}</span>
+                            @if(auth()->user()->division)
+                            <span class="text-xs text-primary">{{ auth()->user()->division->name }}</span>
+                            @endif
+                        </div>
+                        <i class="fa fa-chevron-down ms-2 text-xs"></i>
                     </div>
-                </div>
-            </li>
-            <li class="nav-item d-flex align-items-center">
-                <a href="{{ url('/logout')}}" class="nav-link text-body font-weight-bold px-0">
-                    <i class="fa fa-user me-sm-1"></i>
-                    <span class="d-sm-inline d-none">Sign Out</span>
                 </a>
+                <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="profileDropdown">
+                    <li class="mb-2">
+                        <a class="dropdown-item border-radius-md" href="{{ url('profile') }}">
+                            <div class="d-flex py-1">
+                                <div class="my-auto">
+                                    <i class="ni ni-single-02 text-info me-3"></i>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="text-sm font-weight-normal mb-1">
+                                        <span class="font-weight-bold">Profile</span>
+                                    </h6>
+                                    <p class="text-xs text-secondary mb-0">
+                                        Lihat dan edit profil Anda
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item border-radius-md" href="{{ url('/logout') }}">
+                            <div class="d-flex py-1">
+                                <div class="my-auto">
+                                    <i class="ni ni-button-power text-danger me-3"></i>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="text-sm font-weight-normal mb-1">
+                                        <span class="font-weight-bold">Logout</span>
+                                    </h6>
+                                    <p class="text-xs text-secondary mb-0">
+                                        Keluar dari sistem
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
                 <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">

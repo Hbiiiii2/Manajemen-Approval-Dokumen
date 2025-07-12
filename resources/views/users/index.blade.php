@@ -18,6 +18,156 @@
           </a>
         </div>
         <div class="card-body px-0 pt-0 pb-2">
+          <!-- Advanced Search & Filter -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0">
+                    <i class="fas fa-search me-2"></i>
+                    Advanced Search & Filter
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <form method="GET" action="{{ route('users.index') }}" id="searchForm">
+                    <div class="row">
+                      <!-- Search Input -->
+                      <div class="col-md-6 mb-3">
+                        <label for="search" class="form-label">Cari User</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ request('search') }}" 
+                               placeholder="Cari berdasarkan nama atau email...">
+                      </div>
+                      
+                      <!-- Role Filter -->
+                      <div class="col-md-3 mb-3">
+                        <label for="role_id" class="form-label">Role</label>
+                        <select class="form-control" id="role_id" name="role_id">
+                          <option value="">Semua Role</option>
+                          @foreach($filterOptions['roles'] as $role)
+                            <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>
+                              {{ ucfirst($role->name) }}
+                            </option>
+                          @endforeach
+                        </select>
+                      </div>
+                      
+                      <!-- Division Filter -->
+                      <div class="col-md-3 mb-3">
+                        <label for="division_id" class="form-label">Divisi</label>
+                        <select class="form-control" id="division_id" name="division_id">
+                          <option value="">Semua Divisi</option>
+                          @foreach($filterOptions['divisions'] as $division)
+                            <option value="{{ $division->id }}" {{ request('division_id') == $division->id ? 'selected' : '' }}>
+                              {{ $division->name }}
+                            </option>
+                          @endforeach
+                        </select>
+                      </div>
+                      
+                      <!-- Status Filter -->
+                      <div class="col-md-3 mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-control" id="status" name="status">
+                          <option value="">Semua Status</option>
+                          @foreach($filterOptions['statuses'] as $value => $label)
+                            <option value="{{ $value }}" {{ request('status') == $value ? 'selected' : '' }}>
+                              {{ $label }}
+                            </option>
+                          @endforeach
+                        </select>
+                      </div>
+                      
+                      <!-- Date Range -->
+                      <div class="col-md-3 mb-3">
+                        <label for="date_from" class="form-label">Tanggal Dibuat Dari</label>
+                        <input type="date" class="form-control" id="date_from" name="date_from" 
+                               value="{{ request('date_from') }}">
+                      </div>
+                      
+                      <div class="col-md-3 mb-3">
+                        <label for="date_to" class="form-label">Tanggal Dibuat Sampai</label>
+                        <input type="date" class="form-control" id="date_to" name="date_to" 
+                               value="{{ request('date_to') }}">
+                      </div>
+                      
+                      <!-- Last Login Range -->
+                      <div class="col-md-3 mb-3">
+                        <label for="last_login_from" class="form-label">Last Login Dari</label>
+                        <input type="date" class="form-control" id="last_login_from" name="last_login_from" 
+                               value="{{ request('last_login_from') }}">
+                      </div>
+                      
+                      <div class="col-md-3 mb-3">
+                        <label for="last_login_to" class="form-label">Last Login Sampai</label>
+                        <input type="date" class="form-control" id="last_login_to" name="last_login_to" 
+                               value="{{ request('last_login_to') }}">
+                      </div>
+                      
+                      <!-- Sort Options -->
+                      <div class="col-md-3 mb-3">
+                        <label for="sort_by" class="form-label">Urutkan Berdasarkan</label>
+                        <select class="form-control" id="sort_by" name="sort_by">
+                          @foreach($filterOptions['sortOptions'] as $value => $label)
+                            <option value="{{ $value }}" {{ request('sort_by', 'created_at') == $value ? 'selected' : '' }}>
+                              {{ $label }}
+                            </option>
+                          @endforeach
+                        </select>
+                      </div>
+                      
+                      <div class="col-md-3 mb-3">
+                        <label for="sort_order" class="form-label">Urutan</label>
+                        <select class="form-control" id="sort_order" name="sort_order">
+                          <option value="desc" {{ request('sort_order', 'desc') == 'desc' ? 'selected' : '' }}>Terbaru</option>
+                          <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Terlama</option>
+                        </select>
+                      </div>
+                      
+                      <!-- Per Page -->
+                      <div class="col-md-3 mb-3">
+                        <label for="per_page" class="form-label">Data per Halaman</label>
+                        <select class="form-control" id="per_page" name="per_page">
+                          <option value="5" {{ request('per_page', '10') == '5' ? 'selected' : '' }}>5</option>
+                          <option value="10" {{ request('per_page', '10') == '10' ? 'selected' : '' }}>10</option>
+                          <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
+                          <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
+                          <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <button type="submit" class="btn btn-primary me-2">
+                              <i class="fas fa-search me-1"></i> Cari
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                              <i class="fas fa-times me-1"></i> Reset
+                            </button>
+                          </div>
+                          <div>
+                            <span class="text-muted small">
+                              @if($users->total() > 0)
+                                Menampilkan {{ $users->firstItem() }} - {{ $users->lastItem() }} 
+                                dari {{ $users->total() }} user
+                              @else
+                                Tidak ada user ditemukan
+                              @endif
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
           @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show mx-3" role="alert">
               {{ session('success') }}
@@ -83,8 +233,16 @@
                     <td class="align-middle text-center">
                       @if($user->id === auth()->id())
                         <span class="badge badge-sm bg-gradient-info">Current User</span>
-                      @else
+                      @elseif($user->last_login_at && $user->last_login_at->diffInDays(now()) <= 30)
                         <span class="badge badge-sm bg-gradient-success">Active</span>
+                        <br><small class="text-xs text-secondary">{{ $user->last_login_at->diffForHumans() }}</small>
+                      @else
+                        <span class="badge badge-sm bg-gradient-warning">Inactive</span>
+                        @if($user->last_login_at)
+                          <br><small class="text-xs text-secondary">{{ $user->last_login_at->diffForHumans() }}</small>
+                        @else
+                          <br><small class="text-xs text-secondary">Never logged in</small>
+                        @endif
                       @endif
                     </td>
                     <td class="align-middle text-center">
@@ -134,10 +292,7 @@
               </table>
             </div>
             <div class="d-flex justify-content-center mt-3">
-              {{ $users->links() }}
-            </div>
-            <div class="text-center text-muted small">
-              Menampilkan {{ $users->firstItem() }} sampai {{ $users->lastItem() }} dari {{ $users->total() }} data
+              {{ $users->appends(request()->query())->links() }}
             </div>
           @else
             <div class="text-center py-4">
@@ -154,4 +309,75 @@
     </div>
   </div>
 </div>
-@endsection 
+@endsection
+
+<script>
+function clearFilters() {
+    // Clear all form inputs
+    document.getElementById('searchForm').reset();
+    
+    // Redirect to clean URL
+    window.location.href = '{{ route('users.index') }}';
+}
+
+// Auto-submit form when certain filters change
+document.addEventListener('DOMContentLoaded', function() {
+    const autoSubmitElements = ['role_id', 'division_id', 'status', 'sort_by', 'sort_order', 'per_page'];
+    
+    autoSubmitElements.forEach(function(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener('change', function() {
+                document.getElementById('searchForm').submit();
+            });
+        }
+    });
+    
+    // Add search debounce
+    let searchTimeout;
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                document.getElementById('searchForm').submit();
+            }, 500); // Submit after 500ms of no typing
+        });
+    }
+});
+</script>
+
+<style>
+.card-header.bg-light {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .col-md-3, .col-md-6 {
+        margin-bottom: 1rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+</style> 

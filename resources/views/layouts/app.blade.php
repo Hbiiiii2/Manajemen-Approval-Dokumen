@@ -46,6 +46,58 @@
   <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.0.3') }}" rel="stylesheet" />
   <!-- SweetAlert2 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  
+  <!-- Custom CSS for Profile Dropdown -->
+  <style>
+    .profile-dropdown .dropdown-menu {
+      min-width: 280px;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    
+    .profile-dropdown .dropdown-menu.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .profile-dropdown .dropdown-item {
+      border-radius: 10px;
+      margin: 2px 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .profile-dropdown .dropdown-item:hover {
+      background-color: #f8f9fa;
+      transform: translateX(5px);
+    }
+    
+    .profile-dropdown .dropdown-item i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .profile-dropdown .nav-link {
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .profile-dropdown .nav-link:hover {
+      background-color: rgba(0,0,0,0.05);
+    }
+    
+    .profile-dropdown .fa-chevron-down {
+      transition: transform 0.3s ease;
+    }
+    
+    .profile-dropdown.show .fa-chevron-down {
+      transform: rotate(180deg);
+    }
+  </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100 {{ (\Request::is('rtl') ? 'rtl' : (Request::is('virtual-reality') ? 'virtual-reality' : '')) }} ">
@@ -84,6 +136,47 @@
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{ asset('assets/js/soft-ui-dashboard.min.js?v=1.0.3') }}"></script>
+  
+  <!-- Custom JavaScript for Profile Dropdown -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Profile dropdown animation
+      const profileDropdown = document.getElementById('profileDropdown');
+      const dropdownMenu = profileDropdown?.nextElementSibling;
+      
+      if (profileDropdown && dropdownMenu) {
+        profileDropdown.addEventListener('click', function() {
+          const isOpen = dropdownMenu.classList.contains('show');
+          
+          if (!isOpen) {
+            // Add show class with animation
+            dropdownMenu.style.display = 'block';
+            dropdownMenu.style.opacity = '0';
+            dropdownMenu.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+              dropdownMenu.classList.add('show');
+              dropdownMenu.style.opacity = '1';
+              dropdownMenu.style.transform = 'translateY(0)';
+            }, 10);
+          }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!profileDropdown.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.classList.remove('show');
+            dropdownMenu.style.opacity = '0';
+            dropdownMenu.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+              dropdownMenu.style.display = 'none';
+            }, 200);
+          }
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

@@ -27,6 +27,7 @@ class User extends Authenticatable
         'phone',
         'location',
         'about_me',
+        'last_login_at',
     ];
 
     /**
@@ -46,6 +47,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
     ];
     
     public function role()

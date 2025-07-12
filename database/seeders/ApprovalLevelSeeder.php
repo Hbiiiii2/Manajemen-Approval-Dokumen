@@ -14,8 +14,8 @@ class ApprovalLevelSeeder extends Seeder
     public function run(): void
     {
         DB::table('approval_levels')->insert([
-            ['name' => 'Manager', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Section Head', 'level' => 2, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Section Head', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Dept Head', 'level' => 2, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

@@ -19,31 +19,139 @@ class DocumentController extends Controller
     {
         $user = Auth::user();
         
+        // Base query dengan eager loading
+        $query = Document::with(['user', 'documentType', 'division']);
+        
+        // Role-based filtering
         if ($user->role->name === 'admin') {
             // Admin bisa lihat semua dokumen semua divisi
-            $query = Document::with(['user', 'documentType', 'division']);
-            
-            // Filter divisi jika ada
-            if ($request->has('division_filter') && $request->division_filter) {
-                $query->where('division_id', $request->division_filter);
-            }
-            
-            $documents = $query->latest()->paginate(10);
         } elseif ($user->role->name === 'staff') {
             // Staff hanya bisa lihat dokumen yang mereka ajukan sendiri
-            $documents = Document::with(['user', 'documentType', 'division'])
-                ->where('user_id', $user->id)
-                ->latest()
-                ->paginate(10);
+            $query->where('user_id', $user->id);
         } else {
             // Dept head, section head, manager hanya bisa lihat dokumen divisinya
-            $documents = Document::with(['user', 'documentType', 'division'])
-                ->where('division_id', $user->division_id)
-                ->latest()
-                ->paginate(10);
+            $query->where('division_id', $user->division_id);
         }
         
-        return view('documents.index', compact('documents'));
+        // Advanced Search & Filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                               ->orWhere('email', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Filter by document type
+        if ($request->filled('document_type_id')) {
+            $query->where('document_type_id', $request->document_type_id);
+        }
+        
+        // Filter by division (only for admin)
+        if ($user->role->name === 'admin' && $request->filled('division_id')) {
+            $query->where('division_id', $request->division_id);
+        }
+        
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        
+        // Filter by approval status (if user is approver)
+        if (in_array($user->role->name, ['manager', 'section_head', 'dept_head', 'admin']) && $request->filled('approval_status')) {
+            if ($request->approval_status === 'pending_approval') {
+                $query->where('status', 'pending')
+                      ->whereDoesntHave('approvals', function($q) use ($user) {
+                          $q->where('user_id', $user->id);
+                      });
+            } elseif ($request->approval_status === 'approved_by_me') {
+                $query->whereHas('approvals', function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->where('status', 'approved');
+                });
+            } elseif ($request->approval_status === 'rejected_by_me') {
+                $query->whereHas('approvals', function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->where('status', 'rejected');
+                });
+            }
+        }
+        
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Validate sort fields
+        $allowedSortFields = ['title', 'status', 'created_at', 'updated_at'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'created_at';
+        }
+        
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Pagination
+        $perPage = $request->get('per_page', 10);
+        $allowedPerPage = [5, 10, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+        
+        $documents = $query->paginate($perPage);
+        
+        // Get filter options for the view
+        $filterOptions = $this->getFilterOptions($user);
+        
+        return view('documents.index', compact('documents', 'filterOptions'));
+    }
+    
+    /**
+     * Get filter options based on user role
+     */
+    private function getFilterOptions($user)
+    {
+        $options = [
+            'documentTypes' => DocumentType::orderBy('name')->get(),
+            'statuses' => [
+                'pending' => 'Pending',
+                'approved' => 'Approved',
+                'rejected' => 'Rejected'
+            ],
+            'sortOptions' => [
+                'created_at' => 'Tanggal Dibuat',
+                'title' => 'Judul Dokumen',
+                'status' => 'Status',
+                'updated_at' => 'Tanggal Update'
+            ]
+        ];
+        
+        // Add division options for admin
+        if ($user->role->name === 'admin') {
+            $options['divisions'] = Division::where('status', 'active')->orderBy('name')->get();
+        }
+        
+        // Add approval status options for approvers
+        if (in_array($user->role->name, ['manager', 'section_head', 'dept_head', 'admin'])) {
+            $options['approvalStatuses'] = [
+                'pending_approval' => 'Menunggu Approval Saya',
+                'approved_by_me' => 'Sudah Saya Approve',
+                'rejected_by_me' => 'Sudah Saya Reject'
+            ];
+        }
+        
+        return $options;
     }
 
     /**

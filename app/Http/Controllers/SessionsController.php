@@ -22,6 +22,11 @@ class SessionsController extends Controller
 
         if(Auth::attempt($attributes))
         {
+            // Update last login time
+            $user = Auth::user();
+            $user->last_login_at = now();
+            $user->save();
+            
             session()->regenerate();
             return redirect('dashboard')->with(['success'=>'You are logged in.']);
         }
