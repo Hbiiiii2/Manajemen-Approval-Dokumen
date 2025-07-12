@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .icon { fill: #007bff; }
+      .bg { fill: #ffffff; }
+      .check { fill: #28a745; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect class="bg" width="100" height="100" rx="15"/>
+  
+  <!-- Document -->
+  <path class="icon" d="M25 20h35l15 15v35c0 2.8-2.2 5-5 5H25c-2.8 0-5-2.2-5-5V25c0-2.8 2.2-5 5-5zm35 2H25c-1.7 0-3 1.3-3 3v40c0 1.7 1.3 3 3 3h40c1.7 0 3-1.3 3-3V37l-13-15z"/>
+  
+  <!-- Document corner fold -->
+  <path class="icon" d="M60 20v15h15z"/>
+  
+  <!-- Document lines -->
+  <path class="icon" d="M30 45h30v2H30z"/>
+  <path class="icon" d="M30 50h30v2H30z"/>
+  <path class="icon" d="M30 55h20v2H30z"/>
+  
+  <!-- Approval checkmark -->
+  <circle class="check" cx="70" cy="30" r="8"/>
+  <path class="bg" d="M67 30l2 2 4-4" stroke="#ffffff" stroke-width="2" fill="none"/>
+</svg> 

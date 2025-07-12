@@ -239,5 +239,29 @@
         <button type="submit" class="btn btn-primary">Ajukan Dokumen</button>
     </form>
 </div>
+
+{{-- SweetAlert Delete Confirmation Example --}}
+<script>
+    // Contoh penggunaan SweetAlert untuk delete confirmation
+    function deleteUser(userId, userName) {
+        showDeleteConfirm(`Apakah Anda yakin ingin menghapus user "${userName}"?`, function() {
+            // Lakukan delete action
+            window.location.href = `/user-management/${userId}/delete`;
+        });
+    }
+
+    // Contoh penggunaan SweetAlert untuk form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Optional: Show loading state
+        Swal.fire({
+            title: 'Mengirim Dokumen...',
+            text: 'Mohon tunggu sebentar',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    });
+</script>
  
 @endsection

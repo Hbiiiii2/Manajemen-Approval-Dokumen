@@ -12,6 +12,8 @@
 ## Sistem Manajemen Approval Dokumen Berbasis Laravel
 Sistem manajemen dokumen yang dikembangkan dengan Laravel dan Soft UI Dashboard untuk mengelola pengajuan, approval, dan tracking dokumen dalam organisasi.
 
+**Developer**: [Hbiiiii2](https://github.com/Hbiiiii2)
+
 ## Fitur Utama
 
 ### 🔐 **Sistem Autentikasi & Role Management**
@@ -241,10 +243,10 @@ Kami menggunakan GitHub Issues untuk bug tracking. Beberapa saran untuk melapork
 3. Sebutkan browser yang digunakan jika relevan
 
 ## Licensing
-- Copyright 2021 [Creative Tim](https://www.creative-tim.com?ref=readme-sudpl)
-- Creative Tim [license](https://www.creative-tim.com/license?ref=readme-sudpl)
+- Copyright 2024 [Hbiiiii2](https://github.com/Hbiiiii2)
+- MIT License
 
 ## Credits
 
-- [Creative Tim](https://creative-tim.com/?ref=sudl-readme) - UI Components
-- [UPDIVISION](https://updivision.com) - Laravel Development
+- [Hbiiiii2](https://github.com/Hbiiiii2) - Developer & Maintainer
+- [Creative Tim](https://creative-tim.com/?ref=sudl-readme) - UI Components (Soft UI Dashboard)
