@@ -136,6 +136,9 @@
             <div class="d-flex justify-content-center mt-3">
               {{ $users->links() }}
             </div>
+            <div class="text-center text-muted small">
+              Menampilkan {{ $users->firstItem() }} sampai {{ $users->lastItem() }} dari {{ $users->total() }} data
+            </div>
           @else
             <div class="text-center py-4">
               <i class="ni ni-single-02 text-secondary" style="font-size: 3rem;"></i>

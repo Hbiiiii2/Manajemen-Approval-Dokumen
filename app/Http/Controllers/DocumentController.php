@@ -54,8 +54,11 @@ class DocumentController extends Controller
         $user = Auth::user();
         $userDivisions = collect();
         
-        // Use primary division
-        if ($user->division_id) {
+        if ($user->role->name === 'admin') {
+            // Admin bisa pilih semua divisi
+            $userDivisions = Division::where('status', 'active')->get();
+        } elseif ($user->division_id) {
+            // User lain hanya bisa pilih divisi mereka sendiri
             $userDivisions = collect([$user->division]);
         }
         
@@ -80,7 +83,7 @@ class DocumentController extends Controller
         ]);
 
         // Check if user has access to this division
-        if ($validated['division_id'] != $user->division_id) {
+        if ($user->role->name !== 'admin' && $validated['division_id'] != $user->division_id) {
             return back()->with('error', 'Anda tidak memiliki akses ke divisi ini.');
         }
 

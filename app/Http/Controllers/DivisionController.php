@@ -10,12 +10,7 @@ class DivisionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(function ($request, $next) {
-            if (!Auth::user() || Auth::user()->role->name !== 'admin') {
-                abort(403, 'Unauthorized');
-            }
-            return $next($request);
-        });
+        // Admin middleware sudah ditangani di route
     }
 
     public function index()

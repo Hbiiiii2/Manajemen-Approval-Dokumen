@@ -53,9 +53,9 @@
                   <label for="division_id" class="form-control-label">Divisi</label>
                   <select class="form-control" id="division_id" name="division_id" required>
                     <option value="">Pilih Divisi</option>
-                    @foreach($userDivisions as $divisionRole)
-                      <option value="{{ $divisionRole->division->id }}" {{ old('division_id') == $divisionRole->division->id ? 'selected' : '' }}>
-                        {{ $divisionRole->division->name }} ({{ $divisionRole->division->code }})
+                    @foreach($userDivisions as $division)
+                      <option value="{{ $division->id }}" {{ old('division_id') == $division->id ? 'selected' : '' }}>
+                        {{ $division->name }} ({{ $division->code }})
                       </option>
                     @endforeach
                   </select>

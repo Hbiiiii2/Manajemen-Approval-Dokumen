@@ -112,6 +112,9 @@
             <div class="d-flex justify-content-center mt-3">
               {{ $approvalHistory->links() }}
             </div>
+            <div class="text-center text-muted small">
+              Menampilkan {{ $approvalHistory->firstItem() }} sampai {{ $approvalHistory->lastItem() }} dari {{ $approvalHistory->total() }} data
+            </div>
           @else
             <div class="text-center py-4">
               <i class="ni ni-check-bold text-secondary" style="font-size: 3rem;"></i>

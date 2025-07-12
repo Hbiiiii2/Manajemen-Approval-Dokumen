@@ -94,7 +94,7 @@ Route::group(['middleware' => 'auth'], function () {
     });
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('divisions', App\Http\Controllers\DivisionController::class)->except(['show']);
 });
 

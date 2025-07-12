@@ -53,6 +53,9 @@
           <div class="d-flex justify-content-center mt-3">
             {{ $divisions->links() }}
           </div>
+          <div class="text-center text-muted small">
+            Menampilkan {{ $divisions->firstItem() }} sampai {{ $divisions->lastItem() }} dari {{ $divisions->total() }} data
+          </div>
         </div>
       </div>
     </div>
