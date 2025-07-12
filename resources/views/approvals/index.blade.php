@@ -52,6 +52,9 @@
                     </td>
                     <td class="align-middle text-center">
                       <div class="btn-group" role="group">
+                        <a href="{{ route('documents.show', $document->id) }}" class="btn btn-info btn-sm" title="Detail Dokumen">
+                          <i class="fas fa-eye"></i> Detail
+                        </a>
                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal{{ $document->id }}">
                           <i class="fas fa-check"></i> Approve
                         </button>

@@ -40,6 +40,7 @@
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">User</th>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Email</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Role</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Divisi</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tanggal Dibuat</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
@@ -67,6 +68,16 @@
                         <span class="badge badge-sm bg-gradient-secondary">{{ ucfirst($user->role->name) }}</span>
                       @else
                         <span class="badge badge-sm bg-gradient-warning">No Role</span>
+                      @endif
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                      @if($user->division)
+                        <span class="badge badge-sm bg-gradient-primary">{{ $user->division->name }}</span>
+                        @if($user->divisionRoles->count() > 1)
+                          <br><small class="text-xs text-secondary">+{{ $user->divisionRoles->count() - 1 }} divisi lain</small>
+                        @endif
+                      @else
+                        <span class="badge badge-sm bg-gradient-warning">No Division</span>
                       @endif
                     </td>
                     <td class="align-middle text-center">

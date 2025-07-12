@@ -33,6 +33,9 @@
                     <div class="d-flex flex-column">
                         <span class="text-sm font-weight-bold mb-0">{{ auth()->user()->name }}</span>
                         <span class="text-xs text-secondary">{{ ucfirst(str_replace('_', ' ', auth()->user()->role->name)) }}</span>
+                        @if(auth()->user()->division)
+                        <span class="text-xs text-primary">{{ auth()->user()->division->name }}</span>
+                        @endif
                     </div>
                 </div>
             </li>

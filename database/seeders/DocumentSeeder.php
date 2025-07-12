@@ -6,99 +6,206 @@ use Illuminate\Database\Seeder;
 use App\Models\Document;
 use App\Models\User;
 use App\Models\DocumentType;
+use App\Models\Division;
+use App\Models\Role;
+use Faker\Factory as Faker;
 
 class DocumentSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
-        $users = User::all();
+        $faker = Faker::create('id_ID');
+        $divisions = Division::all();
         $documentTypes = DocumentType::all();
         
-        if ($users->isEmpty()) {
-            $this->command->info('No users found. Please run UserSeeder first.');
-            return;
-        }
-        
-        if ($documentTypes->isEmpty()) {
-            $this->command->info('No document types found. Please run DocumentTypeSeeder first.');
+        // Get staff role by name
+        $staffRole = Role::where('name', 'staff')->first();
+        if (!$staffRole) {
+            echo "Staff role not found. Skipping document creation.\n";
             return;
         }
 
-        $statuses = ['pending', 'approved', 'rejected'];
-        
-        // Create sample documents with more realistic data
-        $sampleDocuments = [
-            [
-                'title' => 'Surat Permohonan Cuti Tahunan',
-                'description' => 'Permohonan cuti tahunan untuk periode Juli 2024',
-                'status' => 'pending'
+        // Document templates per division (using division code as key)
+        $divisionDocuments = [
+            'IT' => [
+                'Sistem Update Proposal',
+                'Infrastructure Maintenance Report',
+                'Software Development Plan',
+                'Network Security Audit',
+                'Database Migration Plan',
+                'Cloud Migration Strategy',
+                'IT Budget Proposal',
+                'System Integration Report',
+                'Cybersecurity Policy',
+                'Technology Roadmap',
             ],
-            [
-                'title' => 'Laporan Keuangan Q2 2024',
-                'description' => 'Laporan keuangan triwulan kedua tahun 2024',
-                'status' => 'approved'
+            'HR' => [
+                'Employee Handbook Update',
+                'Recruitment Strategy Plan',
+                'Training Program Proposal',
+                'Performance Review Policy',
+                'Compensation Structure',
+                'Employee Benefits Plan',
+                'Workplace Safety Policy',
+                'Diversity & Inclusion Plan',
+                'HR Budget Proposal',
+                'Employee Engagement Survey',
             ],
-            [
-                'title' => 'Proposal Pengembangan Sistem',
-                'description' => 'Proposal pengembangan sistem manajemen dokumen',
-                'status' => 'pending'
+            'FIN' => [
+                'Annual Budget Report',
+                'Financial Statement Analysis',
+                'Investment Proposal',
+                'Cost Reduction Plan',
+                'Tax Planning Strategy',
+                'Audit Report',
+                'Cash Flow Projection',
+                'Financial Risk Assessment',
+                'Budget Variance Analysis',
+                'Financial Policy Update',
             ],
-            [
-                'title' => 'Kontrak Kerja Karyawan Baru',
-                'description' => 'Kontrak kerja untuk posisi Software Developer',
-                'status' => 'approved'
+            'MKT' => [
+                'Marketing Campaign Plan',
+                'Brand Strategy Proposal',
+                'Digital Marketing Budget',
+                'Market Research Report',
+                'Product Launch Plan',
+                'Customer Acquisition Strategy',
+                'Social Media Strategy',
+                'Marketing ROI Analysis',
+                'Competitive Analysis',
+                'Marketing Budget Allocation',
             ],
-            [
-                'title' => 'Laporan Aktivitas Bulanan',
-                'description' => 'Laporan aktivitas dan pencapaian bulan Juni 2024',
-                'status' => 'rejected'
+            'OPS' => [
+                'Operational Efficiency Report',
+                'Process Improvement Plan',
+                'Supply Chain Optimization',
+                'Quality Management System',
+                'Operational Budget',
+                'Performance Metrics Report',
+                'Risk Management Plan',
+                'Compliance Audit Report',
+                'Operational Strategy',
+                'Resource Allocation Plan',
             ],
-            [
-                'title' => 'Surat Permohonan Reimbursement',
-                'description' => 'Permohonan reimbursement biaya transportasi',
-                'status' => 'pending'
+            'SALES' => [
+                'Sales Strategy Plan',
+                'Revenue Projection',
+                'Customer Relationship Plan',
+                'Sales Training Program',
+                'Sales Performance Report',
+                'Market Expansion Plan',
+                'Sales Budget Proposal',
+                'Customer Retention Strategy',
+                'Sales Process Optimization',
+                'Sales Team Structure',
             ],
-            [
-                'title' => 'Laporan Audit Internal',
-                'description' => 'Laporan audit internal departemen IT',
-                'status' => 'approved'
+            'LEGAL' => [
+                'Contract Review Report',
+                'Compliance Policy Update',
+                'Legal Risk Assessment',
+                'Intellectual Property Strategy',
+                'Regulatory Compliance Plan',
+                'Legal Budget Proposal',
+                'Contract Template Update',
+                'Legal Process Optimization',
+                'Compliance Training Plan',
+                'Legal Strategy Document',
             ],
-            [
-                'title' => 'Proposal Budget 2025',
-                'description' => 'Proposal anggaran tahun 2025',
-                'status' => 'pending'
+            'RND' => [
+                'R&D Project Proposal',
+                'Innovation Strategy Plan',
+                'Research Methodology',
+                'Product Development Roadmap',
+                'Technology Assessment Report',
+                'R&D Budget Allocation',
+                'Patent Application Strategy',
+                'Research Collaboration Plan',
+                'Innovation Metrics Report',
+                'R&D Process Optimization',
             ],
-            [
-                'title' => 'Kontrak Vendor',
-                'description' => 'Kontrak kerja sama dengan vendor IT',
-                'status' => 'approved'
+            'CS' => [
+                'Customer Service Policy',
+                'Service Quality Report',
+                'Customer Feedback Analysis',
+                'Service Improvement Plan',
+                'Customer Support Strategy',
+                'Service Level Agreement',
+                'Customer Satisfaction Survey',
+                'Service Process Optimization',
+                'Customer Training Program',
+                'Service Budget Proposal',
             ],
-            [
-                'title' => 'Laporan Evaluasi Kinerja',
-                'description' => 'Laporan evaluasi kinerja karyawan',
-                'status' => 'rejected'
-            ]
+            'QA' => [
+                'Quality Management Plan',
+                'Quality Metrics Report',
+                'Process Improvement Plan',
+                'Quality Audit Report',
+                'Quality Standards Update',
+                'Quality Training Program',
+                'Quality Budget Proposal',
+                'Quality Risk Assessment',
+                'Quality Process Optimization',
+                'Quality Strategy Document',
+            ],
         ];
 
-        foreach ($sampleDocuments as $index => $document) {
-            $user = $users->random();
-            $documentType = $documentTypes->random();
+        $totalDocumentsCreated = 0;
+
+        foreach ($divisions as $division) {
+            // Get staff users for this specific division
+            $divisionUsers = User::where('role_id', $staffRole->id)
+                                ->where('division_id', $division->id)
+                                ->get();
             
-            Document::create([
-                'user_id' => $user->id,
-                'document_type_id' => $documentType->id,
-                'title' => $document['title'],
-                'file_path' => 'documents/sample_' . ($index + 1) . '.pdf',
-                'description' => $document['description'],
-                'status' => $document['status'],
-            ]);
+            // Skip if no staff users in this division
+            if ($divisionUsers->isEmpty()) {
+                echo "Skipping documents for division {$division->name} ({$division->code}) - no staff users found\n";
+                continue;
+            }
+            
+            // Get documents for this division using code
+            $documents = $divisionDocuments[$division->code] ?? [];
+            
+            if (empty($documents)) {
+                echo "No document templates found for division {$division->name} ({$division->code})\n";
+                continue;
+            }
+            
+            $documentsCreated = 0;
+            
+            // Create 10 documents per division (as per template)
+            foreach ($documents as $index => $title) {
+                // Double check to make sure we have users
+                if ($divisionUsers->isEmpty()) {
+                    echo "No users available for division {$division->name} ({$division->code}) - skipping remaining documents\n";
+                    break;
+                }
+                
+                $user = $divisionUsers->random();
+                $documentType = $documentTypes->random();
+                
+                Document::create([
+                    'user_id' => $user->id,
+                    'division_id' => $division->id,
+                    'document_type_id' => $documentType->id,
+                    'title' => $title,
+                    'description' => $faker->paragraph(3),
+                    'file_path' => 'documents/sample.pdf', // Placeholder file path
+                    'status' => ['pending', 'approved', 'rejected'][rand(0, 2)],
+                    'created_at' => $faker->dateTimeBetween('-30 days', 'now'),
+                    'updated_at' => $faker->dateTimeBetween('-30 days', 'now'),
+                ]);
+                
+                $documentsCreated++;
+            }
+            
+            echo "Created {$documentsCreated} documents for division {$division->name} ({$division->code})\n";
+            $totalDocumentsCreated += $documentsCreated;
         }
         
-        $this->command->info('Document seeder completed successfully!');
+        echo "Total documents created: {$totalDocumentsCreated}\n";
     }
 } 

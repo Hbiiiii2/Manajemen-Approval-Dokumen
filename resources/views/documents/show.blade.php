@@ -118,7 +118,7 @@
                 </div>
               </div>
               
-              @if(in_array(auth()->user()->role->name, ['manager', 'section_head']) && $document->status == 'pending')
+              @if(in_array(auth()->user()->role->name, ['manager', 'section_head', 'dept_head']) && $document->status == 'pending')
               <div class="card mt-3">
                 <div class="card-header">
                   <h6>Action Approval</h6>

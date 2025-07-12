@@ -5,18 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Document extends Model
+class DivisionRole extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
         'division_id',
-        'document_type_id',
-        'title',
-        'file_path',
-        'description',
-        'status',
+        'role_id',
+        'is_primary',
+    ];
+
+    protected $casts = [
+        'is_primary' => 'boolean',
     ];
 
     public function user()
@@ -29,13 +30,8 @@ class Document extends Model
         return $this->belongsTo(Division::class);
     }
 
-    public function documentType()
+    public function role()
     {
-        return $this->belongsTo(DocumentType::class);
-    }
-
-    public function approvals()
-    {
-        return $this->hasMany(Approval::class);
+        return $this->belongsTo(Role::class);
     }
 }

@@ -18,6 +18,10 @@ class Approval extends Model
         'approved_at',
     ];
 
+    protected $casts = [
+        'approved_at' => 'datetime',
+    ];
+
     public function document()
     {
         return $this->belongsTo(Document::class);
@@ -29,6 +33,11 @@ class Approval extends Model
     }
 
     public function approvalLevel()
+    {
+        return $this->belongsTo(ApprovalLevel::class, 'level_id');
+    }
+
+    public function level()
     {
         return $this->belongsTo(ApprovalLevel::class, 'level_id');
     }

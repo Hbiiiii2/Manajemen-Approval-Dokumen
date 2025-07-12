@@ -64,16 +64,78 @@
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="primary_division_id" class="form-control-label">Divisi Utama <span class="text-danger">*</span></label>
+                  <select class="form-control @error('primary_division_id') is-invalid @enderror" id="primary_division_id" name="primary_division_id" required>
+                    <option value="">Pilih Divisi Utama</option>
+                    @foreach($divisions as $division)
+                      <option value="{{ $division->id }}" {{ old('primary_division_id', $user->division_id) == $division->id ? 'selected' : '' }}>
+                        {{ $division->name }} ({{ $division->code }})
+                      </option>
+                    @endforeach
+                  </select>
+                  @error('primary_division_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="primary_role_id" class="form-control-label">Role Utama <span class="text-danger">*</span></label>
+                  <select class="form-control @error('primary_role_id') is-invalid @enderror" id="primary_role_id" name="primary_role_id" required>
+                    <option value="">Pilih Role Utama</option>
+                    @foreach($roles as $role)
+                      <option value="{{ $role->id }}" {{ old('primary_role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
+                        {{ ucfirst(str_replace('_', ' ', $role->name)) }}
+                      </option>
+                    @endforeach
+                  </select>
+                  @error('primary_role_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
+                </div>
+              </div>
+            </div>
+
             <div class="form-group">
-              <label for="role_id" class="form-control-label">Role</label>
-              <select class="form-control" id="role_id" name="role_id" required>
-                <option value="">Pilih Role</option>
-                @foreach($roles as $role)
-                  <option value="{{ $role->id }}" {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
-                    {{ ucfirst($role->name) }}
-                  </option>
+              <label class="form-control-label">Divisi Tambahan</label>
+              <div id="additional-divisions">
+                @foreach($user->divisionRoles->where('is_primary', false) as $index => $divisionRole)
+                <div class="row mt-2 additional-division">
+                  <div class="col-md-5">
+                    <select class="form-control" name="divisions[{{ $index }}][division_id]" required>
+                      <option value="">Pilih Divisi</option>
+                      @foreach($divisions as $division)
+                        <option value="{{ $division->id }}" {{ $divisionRole->division_id == $division->id ? 'selected' : '' }}>
+                          {{ $division->name }} ({{ $division->code }})
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-md-5">
+                    <select class="form-control" name="divisions[{{ $index }}][role_id]" required>
+                      <option value="">Pilih Role</option>
+                      @foreach($roles as $role)
+                        <option value="{{ $role->id }}" {{ $divisionRole->role_id == $role->id ? 'selected' : '' }}>
+                          {{ ucfirst(str_replace('_', ' ', $role->name)) }}
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeDivision(this)">
+                      <i class="ni ni-fat-remove"></i> Hapus
+                    </button>
+                  </div>
+                </div>
                 @endforeach
-              </select>
+              </div>
+              <button type="button" class="btn btn-info btn-sm mt-2" onclick="addDivision()">
+                <i class="ni ni-fat-add"></i> Tambah Divisi
+              </button>
+              <small class="form-text text-muted">Opsional: User bisa memiliki role di divisi lain</small>
             </div>
 
             <div class="d-flex justify-content-end">
@@ -86,4 +148,43 @@
     </div>
   </div>
 </div>
+
+<script>
+let divisionCount = {{ $user->divisionRoles->where('is_primary', false)->count() }};
+
+function addDivision() {
+  const container = document.getElementById('additional-divisions');
+  const divisionDiv = document.createElement('div');
+  divisionDiv.className = 'row mt-2 additional-division';
+  divisionDiv.innerHTML = `
+    <div class="col-md-5">
+      <select class="form-control" name="divisions[${divisionCount}][division_id]" required>
+        <option value="">Pilih Divisi</option>
+        @foreach($divisions as $division)
+          <option value="{{ $division->id }}">{{ $division->name }} ({{ $division->code }})</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="col-md-5">
+      <select class="form-control" name="divisions[${divisionCount}][role_id]" required>
+        <option value="">Pilih Role</option>
+        @foreach($roles as $role)
+          <option value="{{ $role->id }}">{{ ucfirst(str_replace('_', ' ', $role->name)) }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="button" class="btn btn-danger btn-sm" onclick="removeDivision(this)">
+        <i class="ni ni-fat-remove"></i> Hapus
+      </button>
+    </div>
+  `;
+  container.appendChild(divisionDiv);
+  divisionCount++;
+}
+
+function removeDivision(button) {
+  button.closest('.additional-division').remove();
+}
+</script>
 @endsection 

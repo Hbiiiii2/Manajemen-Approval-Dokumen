@@ -13,18 +13,19 @@ class ApprovalController extends Controller
     {
         $user = Auth::user();
         $role = $user->role->name;
+        $documents = collect();
         
-        // Dokumen yang perlu diapprove berdasarkan role
-        if (in_array($role, ['manager', 'section_head', 'admin'])) {
+        if (in_array($role, ['manager', 'section_head', 'dept_head', 'admin'])) {
+            // Ambil dokumen dari divisi user
             $documents = Document::where('status', 'pending')
+                ->where('division_id', $user->division_id)
                 ->whereDoesntHave('approvals', function($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })
                 ->with(['user', 'documentType'])
                 ->get();
-        } else {
-            $documents = collect(); // Staff tidak bisa approve
         }
+        // Staff tidak bisa approve, jadi $documents tetap collect() kosong
         
         return view('approvals.index', compact('documents', 'role'));
     }
@@ -32,6 +33,11 @@ class ApprovalController extends Controller
     public function approve(Request $request, Document $document)
     {
         $user = Auth::user();
+        
+        // Cek apakah user memiliki role yang bisa approve
+        if (!in_array($user->role->name, ['manager', 'section_head', 'dept_head', 'admin'])) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk melakukan approval.');
+        }
         
         // Cek apakah user sudah approve dokumen ini
         $existingApproval = Approval::where('document_id', $document->id)
@@ -64,6 +70,11 @@ class ApprovalController extends Controller
     public function reject(Request $request, Document $document)
     {
         $user = Auth::user();
+        
+        // Cek apakah user memiliki role yang bisa approve
+        if (!in_array($user->role->name, ['manager', 'section_head', 'dept_head', 'admin'])) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk melakukan approval.');
+        }
         
         // Cek apakah user sudah approve dokumen ini
         $existingApproval = Approval::where('document_id', $document->id)

@@ -8,22 +8,41 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\DocumentType;
 use App\Models\Approval;
 use App\Models\ApprovalLevel;
+use App\Models\Division;
 
 class DocumentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        if ($user->role && in_array($user->role->name, ['manager', 'section_head', 'admin'])) {
-            // Manager/Section Head/Admin bisa lihat semua dokumen
-            $documents = Document::with('user', 'documentType')->latest()->paginate(10);
+        
+        if ($user->role->name === 'admin') {
+            // Admin bisa lihat semua dokumen semua divisi
+            $query = Document::with(['user', 'documentType', 'division']);
+            
+            // Filter divisi jika ada
+            if ($request->has('division_filter') && $request->division_filter) {
+                $query->where('division_id', $request->division_filter);
+            }
+            
+            $documents = $query->latest()->paginate(10);
+        } elseif ($user->role->name === 'staff') {
+            // Staff hanya bisa lihat dokumen yang mereka ajukan sendiri
+            $documents = Document::with(['user', 'documentType', 'division'])
+                ->where('user_id', $user->id)
+                ->latest()
+                ->paginate(10);
         } else {
-            // Staff hanya bisa lihat dokumen miliknya
-            $documents = Document::with('user', 'documentType')->where('user_id', $user->id)->latest()->paginate(10);
+            // Dept head, section head, manager hanya bisa lihat dokumen divisinya
+            $documents = Document::with(['user', 'documentType', 'division'])
+                ->where('division_id', $user->division_id)
+                ->latest()
+                ->paginate(10);
         }
+        
         return view('documents.index', compact('documents'));
     }
 
@@ -32,8 +51,17 @@ class DocumentController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
+        $userDivisions = collect();
+        
+        // Use primary division
+        if ($user->division_id) {
+            $userDivisions = collect([$user->division]);
+        }
+        
         $documentTypes = DocumentType::all();
-        return view('documents.create', compact('documentTypes'));
+        
+        return view('documents.create', compact('documentTypes', 'userDivisions'));
     }
 
     /**
@@ -41,17 +69,26 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'document_type_id' => 'required|exists:document_types,id',
+            'division_id' => 'required|exists:divisions,id',
             'description' => 'nullable|string',
             'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg|max:20480',
         ]);
+
+        // Check if user has access to this division
+        if ($validated['division_id'] != $user->division_id) {
+            return back()->with('error', 'Anda tidak memiliki akses ke divisi ini.');
+        }
 
         $filePath = $request->file('file')->store('documents', 'public');
 
         $document = Document::create([
             'user_id' => Auth::id(),
+            'division_id' => $validated['division_id'],
             'document_type_id' => $validated['document_type_id'],
             'title' => $validated['title'],
             'file_path' => $filePath,
@@ -67,7 +104,30 @@ class DocumentController extends Controller
      */
     public function show($id)
     {
+        $user = Auth::user();
         $document = Document::with(['user', 'documentType', 'approvals.user'])->findOrFail($id);
+        
+        // Check access based on role and division
+        if ($user->role->name === 'admin') {
+            // Admin can access all documents
+        } elseif ($user->role->name === 'staff') {
+            // Staff can only access their own documents
+            if ($document->user_id !== $user->id) {
+                abort(403, 'Anda tidak memiliki akses ke dokumen ini.');
+            }
+        } elseif (in_array($user->role->name, ['dept_head', 'section_head', 'manager'])) {
+            // Dept head, section head, and manager can access documents from their divisions
+            // Check if user has access to the document's division
+            if ($user->division_id !== $document->division_id) {
+                abort(403, 'Anda tidak memiliki akses ke dokumen ini.');
+            }
+        } else {
+            // Default: Staff can only access their own documents
+            if ($document->user_id !== $user->id) {
+                abort(403, 'Anda tidak memiliki akses ke dokumen ini.');
+            }
+        }
+        
         return view('documents.show', compact('document'));
     }
 

@@ -2,6 +2,37 @@
 
 @section('content')
 <div class="container-fluid py-4">
+  @if(auth()->user()->role->name == 'admin')
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h6>Filter Dashboard</h6>
+        </div>
+        <div class="card-body">
+          <form method="GET" action="{{ route('dashboard') }}" class="row">
+            <div class="col-md-4">
+              <label for="division_filter" class="form-label">Filter Divisi</label>
+              <select class="form-control" id="division_filter" name="division_filter">
+                <option value="">Semua Divisi</option>
+                @foreach(\App\Models\Division::where('status', 'active')->get() as $division)
+                  <option value="{{ $division->id }}" {{ request('division_filter') == $division->id ? 'selected' : '' }}>
+                    {{ $division->name }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary me-2">Filter</button>
+              <a href="{{ route('dashboard') }}" class="btn btn-secondary">Reset</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endif
+
   <div class="row">
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
       <div class="card">
@@ -95,6 +126,45 @@
   </div>
   @endif
 
+  @if(in_array($role, ['manager', 'depthead', 'section_head', 'admin']))
+  <div class="row mt-4">
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-header p-3 pt-2">
+          <div class="icon icon-lg icon-shape bg-gradient-success shadow text-center border-radius-xl mt-n4 position-absolute">
+            <i class="ni ni-check-bold opacity-10"></i>
+          </div>
+          <div class="text-end pt-1">
+            <p class="text-sm mb-0 text-capitalize">Total Approved</p>
+            <h4 class="mb-0">{{ \App\Models\Approval::where('user_id', auth()->id())->where('status', 'approved')->count() }}</h4>
+          </div>
+        </div>
+        <hr class="dark horizontal">
+        <div class="card-footer p-3">
+          <p class="mb-0"><span class="text-success text-sm font-weight-bolder">Dokumen Disetujui</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <div class="card-header p-3 pt-2">
+          <div class="icon icon-lg icon-shape bg-gradient-danger shadow text-center border-radius-xl mt-n4 position-absolute">
+            <i class="ni ni-fat-remove opacity-10"></i>
+          </div>
+          <div class="text-end pt-1">
+            <p class="text-sm mb-0 text-capitalize">Total Rejected</p>
+            <h4 class="mb-0">{{ \App\Models\Approval::where('user_id', auth()->id())->where('status', 'rejected')->count() }}</h4>
+          </div>
+        </div>
+        <hr class="dark horizontal">
+        <div class="card-footer p-3">
+          <p class="mb-0"><span class="text-danger text-sm font-weight-bolder">Dokumen Ditolak</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endif
+
   <div class="row mt-4">
     <!-- Dokumen Terbaru -->
     <div class="col-lg-6 col-md-6 mb-md-0 mb-4">
@@ -117,6 +187,9 @@
                 <thead>
                   <tr>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dokumen</th>
+                    @if(auth()->user()->role->name == 'admin')
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Divisi</th>
+                    @endif
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tanggal</th>
                   </tr>
@@ -132,6 +205,15 @@
                         </div>
                       </div>
                     </td>
+                    @if(auth()->user()->role->name == 'admin')
+                    <td>
+                      @if($document->division)
+                        <span class="badge badge-sm bg-gradient-secondary">{{ $document->division->name }}</span>
+                      @else
+                        <span class="badge badge-sm bg-gradient-warning">-</span>
+                      @endif
+                    </td>
+                    @endif
                     <td>
                       @if($document->status == 'pending')
                         <span class="badge badge-sm bg-gradient-warning">Pending</span>
@@ -172,6 +254,11 @@
                 <span class="font-weight-bold">Dokumen yang perlu diapprove</span>
               </p>
             </div>
+            <div class="col-lg-6 col-5 my-auto text-end">
+              <a href="{{ route('approval-history.index') }}" class="btn btn-info btn-sm">
+                <i class="ni ni-time-alarm"></i> History Approval
+              </a>
+            </div>
           </div>
         </div>
         <div class="card-body px-0 pb-2">
@@ -182,6 +269,9 @@
                   <tr>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dokumen</th>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Pembuat</th>
+                    @if(auth()->user()->role->name == 'admin')
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Divisi</th>
+                    @endif
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
                   </tr>
                 </thead>
@@ -198,7 +288,17 @@
                     </td>
                     <td>
                       <p class="text-xs font-weight-bold mb-0">{{ $document->user->name }}</p>
+                      <p class="text-xs text-secondary mb-0">{{ $document->user->email }}</p>
                     </td>
+                    @if(auth()->user()->role->name == 'admin')
+                    <td>
+                      @if($document->division)
+                        <span class="badge badge-sm bg-gradient-secondary">{{ $document->division->name }}</span>
+                      @else
+                        <span class="badge badge-sm bg-gradient-warning">-</span>
+                      @endif
+                    </td>
+                    @endif
                     <td class="align-middle text-center">
                       <a href="{{ route('documents.show', $document->id) }}" class="btn btn-warning btn-sm">
                         <i class="ni ni-check-bold"></i> Review

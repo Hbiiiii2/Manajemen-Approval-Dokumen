@@ -47,9 +47,26 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="description" class="form-control-label">Deskripsi</label>
-              <textarea class="form-control" id="description" name="description" rows="4" required>{{ old('description') }}</textarea>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="division_id" class="form-control-label">Divisi</label>
+                  <select class="form-control" id="division_id" name="division_id" required>
+                    <option value="">Pilih Divisi</option>
+                    @foreach($userDivisions as $divisionRole)
+                      <option value="{{ $divisionRole->division->id }}" {{ old('division_id') == $divisionRole->division->id ? 'selected' : '' }}>
+                        {{ $divisionRole->division->name }} ({{ $divisionRole->division->code }})
+                      </option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="description" class="form-control-label">Deskripsi</label>
+                  <textarea class="form-control" id="description" name="description" rows="4">{{ old('description') }}</textarea>
+                </div>
+              </div>
             </div>
 
             <div class="form-group">

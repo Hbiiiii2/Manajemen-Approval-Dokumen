@@ -78,6 +78,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('approvals', [App\Http\Controllers\ApprovalController::class, 'index'])->name('approvals.index');
     Route::post('approvals/{document}/approve', [App\Http\Controllers\ApprovalController::class, 'approve'])->name('approvals.approve');
     Route::post('approvals/{document}/reject', [App\Http\Controllers\ApprovalController::class, 'reject'])->name('approvals.reject');
+    
+    // Approval History routes
+    Route::get('approval-history', [App\Http\Controllers\ApprovalHistoryController::class, 'index'])->name('approval-history.index');
+    Route::get('approval-history/{approval}', [App\Http\Controllers\ApprovalHistoryController::class, 'show'])->name('approval-history.show');
 
     // User management routes (admin only)
     Route::middleware(['auth', 'admin'])->group(function () {
@@ -90,6 +94,9 @@ Route::group(['middleware' => 'auth'], function () {
     });
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::resource('divisions', App\Http\Controllers\DivisionController::class)->except(['show']);
+});
 
 
 Route::group(['middleware' => 'guest'], function () {

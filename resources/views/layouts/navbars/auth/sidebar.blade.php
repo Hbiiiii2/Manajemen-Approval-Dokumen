@@ -74,6 +74,14 @@
           <span class="nav-link-text ms-1">Approval Dokumen</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('approval-history') ? 'active' : '') }}" href="{{ url('approval-history') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-time-alarm text-info"></i>
+          </div>
+          <span class="nav-link-text ms-1">History Approval</span>
+        </a>
+      </li>
       @endif
 
       <!-- Menu untuk Section Head -->
@@ -84,6 +92,50 @@
             <i class="ni ni-check-bold text-warning"></i>
           </div>
           <span class="nav-link-text ms-1">Approval Dokumen</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('approval-history') ? 'active' : '') }}" href="{{ url('approval-history') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-time-alarm text-info"></i>
+          </div>
+          <span class="nav-link-text ms-1">History Approval</span>
+        </a>
+      </li>
+      @endif
+
+      <!-- Menu untuk Dept Head -->
+      @if(auth()->user()->role->name == 'depthead')
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('documents/create') ? 'active' : '') }}" href="{{ url('documents/create') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-collection text-success"></i>
+          </div>
+          <span class="nav-link-text ms-1">Tambah Dokumen</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('documents') ? 'active' : '') }}" href="{{ url('documents') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-single-copy-04 text-info"></i>
+          </div>
+          <span class="nav-link-text ms-1">Semua Dokumen</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('approvals') ? 'active' : '') }}" href="{{ url('approvals') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-check-bold text-warning"></i>
+          </div>
+          <span class="nav-link-text ms-1">Approval Dokumen</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('approval-history') ? 'active' : '') }}" href="{{ url('approval-history') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-time-alarm text-info"></i>
+          </div>
+          <span class="nav-link-text ms-1">History Approval</span>
         </a>
       </li>
       @endif
@@ -115,6 +167,14 @@
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link {{ (Request::is('approval-history') ? 'active' : '') }}" href="{{ url('approval-history') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-time-alarm text-info"></i>
+          </div>
+          <span class="nav-link-text ms-1">History Approval</span>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link {{ (Request::is('users') && !Request::is('users/create') ? 'active' : '') }}" href="{{ url('users') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-settings-gear-65 text-secondary"></i>
@@ -128,6 +188,14 @@
             <i class="ni ni-single-02 text-primary"></i>
           </div>
           <span class="nav-link-text ms-1">Tambah User</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('divisions') ? 'active' : '') }}" href="{{ url('divisions') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-building text-warning"></i>
+          </div>
+          <span class="nav-link-text ms-1">Manajemen Divisi</span>
         </a>
       </li>
       @endif

@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'division_id',
         'profile_photo',
         'phone',
         'location',
@@ -52,6 +53,16 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function division()
+    {
+        return $this->belongsTo(Division::class);
+    }
+
+    public function divisionRoles()
+    {
+        return $this->hasMany(DivisionRole::class);
+    }
+
     public function documents()
     {
         return $this->hasMany(Document::class);
@@ -60,5 +71,30 @@ class User extends Authenticatable
     public function approvals()
     {
         return $this->hasMany(Approval::class);
+    }
+
+    // Get user's role in specific division
+    public function getRoleInDivision($divisionId)
+    {
+        return $this->divisionRoles()
+            ->where('division_id', $divisionId)
+            ->first();
+    }
+
+    // Get user's primary division
+    public function getPrimaryDivision()
+    {
+        return $this->divisionRoles()
+            ->where('is_primary', true)
+            ->with('division')
+            ->first();
+    }
+
+    // Check if user has access to division
+    public function hasAccessToDivision($divisionId)
+    {
+        return $this->divisionRoles()
+            ->where('division_id', $divisionId)
+            ->exists();
     }
 }
