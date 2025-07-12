@@ -18,7 +18,7 @@
                                         <label>Email</label>
                                         <div class="mb-3">
                                             <input type="email" class="form-control" name="email" id="email"
-                                                placeholder="Email" value="admin@softui.com" aria-label="Email"
+                                                placeholder="Email" value="{{ old('email') }}" aria-label="Email"
                                                 aria-describedby="email-addon">
                                             @error('email')
                                                 <p class="text-danger text-xs mt-2">{{ $message }}</p>
@@ -27,7 +27,7 @@
                                         <label>Password</label>
                                         <div class="mb-3">
                                             <input type="password" class="form-control" name="password" id="password"
-                                                placeholder="Password" value="secret" aria-label="Password"
+                                                placeholder="Password" aria-label="Password"
                                                 aria-describedby="password-addon">
                                             @error('password')
                                                 <p class="text-danger text-xs mt-2">{{ $message }}</p>
