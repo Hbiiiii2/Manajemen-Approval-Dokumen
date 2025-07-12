@@ -1,40 +1,102 @@
-# Prerequisites
+# Issue Template
 
-Please answer the following questions for yourself before submitting an issue.
+## Bug Report
 
-- [ ] I am running the latest version
-- [ ] I checked the documentation and found no answer
-- [ ] I checked to make sure that this issue has not already been filed
-- [ ] I'm reporting the issue to the correct repository (for multi-repository projects)
+### Deskripsi Bug
+Jelaskan bug yang Anda temukan dengan jelas dan singkat.
 
-# Expected Behavior
+### Langkah-langkah Reproduksi
+1. Buka halaman '...'
+2. Klik pada '....'
+3. Scroll ke '....'
+4. Lihat error
 
-Please describe the behavior you are expecting
+### Perilaku yang Diharapkan
+Jelaskan apa yang seharusnya terjadi.
 
-# Current Behavior
+### Perilaku Aktual
+Jelaskan apa yang sebenarnya terjadi.
 
-What is the current behavior?
+### Screenshots
+Jika ada, tambahkan screenshot untuk membantu menjelaskan masalah.
 
-# Failure Information (for bugs)
+### Environment
+- **OS**: [e.g. Windows 10, macOS, Ubuntu]
+- **Browser**: [e.g. Chrome, Firefox, Safari]
+- **Version**: [e.g. 1.0.0]
+- **PHP Version**: [e.g. 8.1]
+- **Laravel Version**: [e.g. 10.x]
 
-Please help provide information about the failure if this is a bug. If it is not a bug, please remove the rest of this template.
+### Additional Context
+Tambahkan konteks lain tentang masalah di sini.
 
-## Steps to Reproduce
+---
 
-Please provide detailed steps for reproducing the issue.
+## Feature Request
 
-1. step 1
-2. step 2
-3. you get it...
+### Deskripsi Fitur
+Jelaskan fitur yang Anda inginkan dengan jelas dan singkat.
 
-## Context
+### Masalah yang Dipecahkan
+Jelaskan masalah yang akan dipecahkan oleh fitur ini.
 
-Please provide any relevant information about your setup. This is important in case the issue is not reproducible except for under certain conditions.
+### Solusi yang Diusulkan
+Jelaskan solusi yang Anda usulkan.
 
-* Device:
-* Operating System:
-* Browser and Version:
+### Alternatif yang Dipertimbangkan
+Jelaskan alternatif lain yang telah Anda pertimbangkan.
 
-## Failure Logs
+### Additional Context
+Tambahkan konteks lain tentang fitur request di sini.
 
-Please include any relevant log snippets or files here.
+---
+
+## Documentation Request
+
+### Topik Dokumentasi
+Jelaskan topik dokumentasi yang Anda butuhkan.
+
+### Tujuan
+Jelaskan mengapa dokumentasi ini diperlukan.
+
+### Target Audience
+Siapa yang akan menggunakan dokumentasi ini?
+
+### Additional Context
+Tambahkan konteks lain tentang request dokumentasi di sini.
+
+---
+
+## General Issue
+
+### Deskripsi
+Jelaskan masalah atau request Anda dengan jelas.
+
+### Konteks
+Berikan konteks tambahan tentang masalah ini.
+
+### Environment (jika relevan)
+- **OS**: [e.g. Windows 10, macOS, Ubuntu]
+- **Browser**: [e.g. Chrome, Firefox, Safari]
+- **Version**: [e.g. 1.0.0]
+
+### Additional Context
+Tambahkan informasi lain yang relevan.
+
+---
+
+## Checklist
+
+Sebelum submit issue, pastikan Anda telah:
+
+- [ ] Mencari issue yang sudah ada
+- [ ] Menggunakan template yang sesuai
+- [ ] Memberikan informasi yang lengkap
+- [ ] Menambahkan screenshot jika diperlukan
+- [ ] Menggunakan bahasa yang sopan dan jelas
+
+## Contact
+
+Jika Anda memiliki pertanyaan, silakan hubungi:
+- **Developer**: [Hbiiiii2](https://github.com/Hbiiiii2)
+- **Repository**: [Manajemen-Approval-Dokumen](https://github.com/Hbiiiii2/Manajemen-Approval-Dokumen)

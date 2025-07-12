@@ -1,3 +1,4 @@
+# Laravel Framework
 /node_modules
 /public/hot
 /public/storage
@@ -5,11 +6,165 @@
 /vendor
 .env
 .env.backup
+.env.production
 .phpunit.result.cache
-docker-compose.override.yml
 Homestead.json
 Homestead.yaml
+auth.json
 npm-debug.log
 yarn-error.log
+/.fleet
 /.idea
 /.vscode
+
+# Laravel Storage
+/storage/app/public/*
+!/storage/app/public/.gitkeep
+
+# Laravel Logs
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Laravel Cache
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/testing/*
+!/storage/framework/testing/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+
+# Laravel Bootstrap
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+
+# Composer
+composer.phar
+/vendor/
+
+# NPM
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache files
+cache/
+*.cache
+
+# Build files
+/public/build/
+/public/mix-manifest.json
+
+# Testing
+/coverage/
+.phpunit.cache/
+
+# Deployment
+deploy.sh
+deploy/
+
+# Documentation build
+/docs/_build/
+
+# Local development
+docker-compose.override.yml
+docker-compose.local.yml
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Backup files
+backup/
+*.tar.gz
+*.zip
+
+# IDE specific
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk

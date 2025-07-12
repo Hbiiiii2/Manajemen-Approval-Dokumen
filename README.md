@@ -80,12 +80,26 @@ Anda juga perlu menginstall:
 
 Setelah menjalankan seeder, Anda dapat login dengan akun berikut:
 
+### Default Users (UserSeeder)
 | Email | Password | Role | Akses |
 |-------|----------|------|-------|
 | admin@softui.com | password | Admin | Full Access |
 | staff@softui.com | password | Staff | Create Documents |
 | manager@softui.com | password | Manager | Create & Approve |
 | section_head@softui.com | password | Section Head | Approve Only |
+
+### Test Users (TestUserSeeder)
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | superadmin@test.com | password |
+| Admin | systemadmin@test.com | password |
+| Staff | john.staff@test.com | password |
+| Staff | sarah.staff@test.com | password |
+| Staff | mike.staff@test.com | password |
+| Manager | david.manager@test.com | password |
+| Manager | lisa.manager@test.com | password |
+| Section Head | robert.sectionhead@test.com | password |
+| Section Head | emma.sectionhead@test.com | password |
 
 ## Usage
 
@@ -202,6 +216,90 @@ routes/
 - `PUT /user-management/{id}` - Update user
 - `DELETE /user-management/{id}` - Delete user
 
+## Seeder Documentation
+
+### Daftar Seeder
+1. **DatabaseSeeder.php** - Seeder utama yang menjalankan semua seeder
+2. **RoleSeeder.php** - Membuat role dasar (staff, manager, section_head, admin)
+3. **ApprovalLevelSeeder.php** - Membuat level approval (Manager, Section Head)
+4. **UserSeeder.php** - Membuat user default untuk setiap role
+5. **DocumentTypeSeeder.php** - Membuat tipe dokumen (Surat Permohonan, Laporan Keuangan, dll)
+6. **DocumentSeeder.php** - Membuat dokumen sample dengan data realistis
+7. **ApprovalSeeder.php** - Membuat data approval untuk dokumen yang sudah approved/rejected
+8. **TestUserSeeder.php** - Membuat user testing tambahan untuk setiap role
+
+### Cara Menjalankan Seeder
+```bash
+# Fresh installation dengan data lengkap
+php artisan migrate:fresh --seed
+
+# Reset database dan jalankan semua seeder
+php artisan migrate:refresh --seed
+
+# Jalankan seeder tertentu
+php artisan db:seed --class=NamaSeeder
+
+# Tambah user testing
+php artisan db:seed --class=TestUserSeeder
+```
+
+## Profile Management Features
+
+### Fitur yang Tersedia
+1. **Informasi Profile** - Menampilkan data user dengan tombol edit
+2. **Ganti Password** - Form dengan validasi password saat ini
+3. **Upload Foto Profile** - Upload foto dengan format JPG, PNG, GIF (max 2MB)
+4. **Edit Profile** - Modal untuk mengedit informasi profile
+
+### Validasi Data
+- **Update Password**: Password saat ini (required), Password baru (min 8 karakter)
+- **Update Profile**: Nama (required, max 255), Email (required, unique)
+- **Upload Photo**: Image, max 2MB, format JPG/PNG/GIF
+
+### File Storage
+- Menggunakan Laravel Storage dengan disk 'public'
+- Path file: `storage/app/public/profile-photos/`
+- Otomatis menghapus foto lama saat upload baru
+
+## User Management Features (Admin Only)
+
+### Fitur yang Tersedia
+1. **List Semua User** - Menampilkan daftar lengkap dengan pagination
+2. **Add User** - Form tambah user dengan validasi ketat
+3. **Edit User** - Update informasi user termasuk password (opsional)
+4. **Delete User** - Hapus user dengan proteksi (tidak bisa hapus akun sendiri)
+
+### Keamanan
+- **Middleware Protection**: `auth` dan `admin`
+- **Validasi Data**: Ketat untuk semua input
+- **Proteksi Delete**: Admin tidak dapat menghapus akun sendiri
+- **Konfirmasi**: Modal konfirmasi sebelum penghapusan
+
+## SweetAlert Integration
+
+### Fitur Notifikasi
+- **Toast Notifications**: Success, Error, Warning, Info
+- **Confirmation Dialogs**: Delete confirmation, general confirmation
+- **Loading States**: Form submission, API calls
+
+### Fungsi yang Tersedia
+```javascript
+showSuccess('Data berhasil disimpan!', 'Berhasil!');
+showError('Terjadi kesalahan!', 'Error!');
+showWarning('Perhatikan input Anda!', 'Peringatan!');
+showInfo('Informasi penting!', 'Informasi!');
+showConfirm('Apakah Anda yakin?', 'Konfirmasi', callback);
+showDeleteConfirm('Apakah Anda yakin ingin menghapus?', callback);
+```
+
+### Session Flash Messages
+```php
+return redirect()->route('documents.index')->with('success', 'Dokumen berhasil diajukan!');
+return back()->with('error', 'Anda sudah melakukan approval pada level ini.');
+return back()->with('warning', 'Perhatikan data yang Anda input.');
+return back()->with('info', 'Informasi penting untuk Anda.');
+```
+
 ## Browser Support
 Mendukung 2 versi terakhir dari browser berikut:
 
@@ -228,12 +326,6 @@ php artisan db:seed
 ```bash
 php artisan test
 ```
-
-## Dokumentasi Lengkap
-
-- [User Management Documentation](README_USER_MANAGEMENT.md)
-- [Profile Feature Documentation](README_PROFILE.md)
-- [Seeder Documentation](README_SEEDERS.md)
 
 ## Reporting Issues
 Kami menggunakan GitHub Issues untuk bug tracking. Beberapa saran untuk melaporkan issue:
