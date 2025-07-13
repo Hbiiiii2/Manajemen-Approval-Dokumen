@@ -60,6 +60,48 @@
                   <td><strong>Tanggal Dibuat:</strong></td>
                   <td>{{ $approval->document->created_at->format('d/m/Y H:i') }}</td>
                 </tr>
+                @if(in_array(auth()->user()->role->name, ['admin', 'dept_head', 'section_head']) && $approval->document && $approval->document->files && $approval->document->files->count())
+                <tr>
+                  <td><strong>File Dokumen:</strong></td>
+                  <td>
+                    <table class="table table-sm table-bordered mb-0">
+                      <thead>
+                        <tr>
+                          <th>Versi</th>
+                          <th>Nama File</th>
+                          <th>Ukuran</th>
+                          <th>Status</th>
+                          <th>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach($approval->document->files as $file)
+                        <tr>
+                          <td>V{{ $file->version }}</td>
+                          <td>{{ $file->original_name }}</td>
+                          <td>{{ number_format($file->file_size / 1024, 2) }} KB</td>
+                          <td>
+                            @if($file->status == 'active')
+                              <span class="badge bg-gradient-success">Active</span>
+                            @else
+                              <span class="badge bg-gradient-secondary">Archived</span>
+                            @endif
+                          </td>
+                          <td>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="showInspectModal('{{ Storage::url($file->file_path) }}', '{{ $file->original_name }}')">
+                              <i class="fas fa-search"></i> Inspect
+                            </button>
+                            <a href="{{ Storage::url($file->file_path) }}" class="btn btn-success btn-sm" target="_blank">
+                              <i class="fas fa-download"></i> Download
+                            </a>
+                          </td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                @endif
               </table>
             </div>
             <div class="col-md-6">
@@ -410,5 +452,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+function showInspectModal(fileUrl, fileName) {
+  var modal = new bootstrap.Modal(document.getElementById('inspectModal'));
+  var body = document.getElementById('inspectModalBody');
+  var title = document.getElementById('inspectModalLabel');
+  title.innerText = 'Preview File: ' + fileName;
+  body.innerHTML = `<iframe src="${fileUrl}#toolbar=1&navpanes=1&scrollbar=1" width="100%" height="600px" style="border:none;max-width:100%;"></iframe>`;
+  modal.show();
+}
 </script>
 @endsection 

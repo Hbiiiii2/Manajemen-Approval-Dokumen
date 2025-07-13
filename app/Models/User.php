@@ -75,6 +75,11 @@ class User extends Authenticatable
         return $this->hasMany(Approval::class);
     }
 
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
     // Get user's role in specific division
     public function getRoleInDivision($divisionId)
     {

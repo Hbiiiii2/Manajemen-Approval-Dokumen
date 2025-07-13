@@ -101,7 +101,7 @@ class UserController extends Controller
     {
         return [
             'roles' => Role::orderBy('name')->get(),
-            'divisions' => Division::where('status', 'active')->orderBy('name')->get(),
+            'divisions' => Division::orderBy('name')->get(),
             'statuses' => [
                 'active' => 'Active (Login dalam 30 hari)',
                 'inactive' => 'Inactive (Tidak login > 30 hari)'
@@ -117,9 +117,10 @@ class UserController extends Controller
 
     public function create()
     {
-        $roles = Role::all();
-        $divisions = Division::where('status', 'active')->get();
-        return view('users.create', compact('roles', 'divisions'));
+        return view('users.create', [
+            'roles' => Role::all(),
+            'divisions' => Division::orderBy('name')->get(),
+        ]);
     }
 
     public function store(Request $request)
@@ -179,7 +180,7 @@ class UserController extends Controller
     {
         $user = User::with('divisionRoles.division')->findOrFail($id);
         $roles = Role::all();
-        $divisions = Division::where('status', 'active')->get();
+        $divisions = Division::get();
         return view('users.edit', compact('user', 'roles', 'divisions'));
     }
 

@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AdminMiddleware
+class AnalyticsAccessMiddleware
 {
     /**
      * Handle an incoming request.
@@ -28,8 +28,8 @@ class AdminMiddleware
             return redirect()->route('access-denied');
         }
 
-        // Cek role untuk akses admin
-        if ($user->role->name !== 'admin') {
+        // Cek role untuk akses dashboard analitik
+        if (!in_array($user->role->name, ['dept_head', 'section_head', 'admin'])) {
             return redirect()->route('access-denied');
         }
 

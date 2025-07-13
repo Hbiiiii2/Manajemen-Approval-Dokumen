@@ -51,15 +51,19 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="division_id" class="form-control-label">Divisi</label>
-                  <select class="form-control" id="division_id" name="division_id" required>
+                  <label for="division_id">Divisi</label>
+                  <select class="form-control @error('division_id') is-invalid @enderror" 
+                          id="division_id" name="division_id" required>
                     <option value="">Pilih Divisi</option>
                     @foreach($userDivisions as $division)
                       <option value="{{ $division->id }}" {{ old('division_id', $document->division_id) == $division->id ? 'selected' : '' }}>
-                        {{ $division->name }} ({{ $division->code }})
+                        {{ $division->name }} @if($division->department) - {{ $division->department->name }} @endif
                       </option>
                     @endforeach
                   </select>
+                  @error('division_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
                 </div>
               </div>
               <div class="col-md-6">

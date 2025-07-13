@@ -29,8 +29,14 @@ Route::get('/', function() {
 
 Route::group(['middleware' => 'auth'], function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('dashboard/export-pdf', [App\Http\Controllers\DashboardController::class, 'exportPdf'])->name('dashboard.export-pdf');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('analytics_access');
+    Route::get('/dashboard-staff', [DashboardController::class, 'staffDashboard'])->name('dashboard-staff');
+    Route::get('dashboard/export-pdf', [App\Http\Controllers\DashboardController::class, 'exportPdf'])->name('dashboard.export-pdf')->middleware('analytics_access');
+    
+    // Error page for access denied
+    Route::get('/access-denied', function () {
+        return view('errors.access-denied');
+    })->name('access-denied');
 
 	Route::get('billing', function () {
 		return view('billing');
@@ -106,6 +112,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('divisions', App\Http\Controllers\DivisionController::class)->except(['show']);
+    Route::resource('departments', App\Http\Controllers\DepartmentController::class)->except(['show']);
 });
 
 

@@ -28,6 +28,9 @@ class SessionsController extends Controller
             $user->save();
             
             session()->regenerate();
+            if ($user->role && $user->role->name === 'staff') {
+                return redirect()->route('dashboard-staff')->with(['success'=>'You are logged in.']);
+            }
             return redirect('dashboard')->with(['success'=>'You are logged in.']);
         }
         else{

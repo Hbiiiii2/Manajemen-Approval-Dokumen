@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Division;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,44 +16,48 @@ class DivisionController extends Controller
 
     public function index()
     {
-        $divisions = Division::paginate(10);
+        $divisions = Division::with(['department', 'users'])->paginate(10);
         return view('divisions.index', compact('divisions'));
     }
 
     public function create()
     {
-        return view('divisions.create');
+        $departments = Department::all();
+        return view('divisions.create', compact('departments'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'code' => 'required|string|max:20|unique:divisions,code',
+        $request->validate([
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
+            'department_id' => 'required|exists:departments,id'
         ]);
-        Division::create($validated);
-        return redirect()->route('divisions.index')->with('success', 'Divisi berhasil ditambahkan!');
+
+        Division::create($request->all());
+
+        return redirect()->route('divisions.index')
+            ->with('success', 'Divisi berhasil ditambahkan.');
     }
 
-    public function edit($id)
+    public function edit(Division $division)
     {
-        $division = Division::findOrFail($id);
-        return view('divisions.edit', compact('division'));
+        $departments = Department::all();
+        return view('divisions.edit', compact('division', 'departments'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Division $division)
     {
-        $division = Division::findOrFail($id);
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'code' => 'required|string|max:20|unique:divisions,code,' . $division->id,
+        $request->validate([
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
+            'department_id' => 'required|exists:departments,id'
         ]);
-        $division->update($validated);
-        return redirect()->route('divisions.index')->with('success', 'Divisi berhasil diupdate!');
+
+        $division->update($request->all());
+
+        return redirect()->route('divisions.index')
+            ->with('success', 'Divisi berhasil diperbarui.');
     }
 
     public function destroy($id)

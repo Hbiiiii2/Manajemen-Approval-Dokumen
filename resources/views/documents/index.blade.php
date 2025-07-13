@@ -13,7 +13,7 @@
                                 <span class="font-weight-bold">Role: {{ ucfirst(auth()->user()->role->name) }}</span>
                             </p>
                         </div>
-                        @if (in_array(auth()->user()->role->name, ['staff', 'manager']))
+                        @if (in_array(auth()->user()->role->name, ['staff', 'section_head', 'admin']))
                             <a href="{{ route('documents.create') }}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Tambah Dokumen
                             </a>
@@ -46,11 +46,9 @@
                                                     <label for="status" class="form-label">Status</label>
                                                     <select class="form-control" id="status" name="status">
                                                         <option value="">Semua Status</option>
-                                                        @foreach($filterOptions['statuses'] as $value => $label)
-                                                            <option value="{{ $value }}" {{ request('status') == $value ? 'selected' : '' }}>
-                                                                {{ $label }}
-                                                            </option>
-                                                        @endforeach
+                                                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                                                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                                                     </select>
                                                 </div>
                                                 
@@ -59,7 +57,7 @@
                                                     <label for="document_type_id" class="form-label">Tipe Dokumen</label>
                                                     <select class="form-control" id="document_type_id" name="document_type_id">
                                                         <option value="">Semua Tipe</option>
-                                                        @foreach($filterOptions['documentTypes'] as $type)
+                                                        @foreach($options['documentTypes'] ?? [] as $type)
                                                             <option value="{{ $type->id }}" {{ request('document_type_id') == $type->id ? 'selected' : '' }}>
                                                                 {{ $type->name }}
                                                             </option>
@@ -68,29 +66,14 @@
                                                 </div>
                                                 
                                                 <!-- Division Filter (Admin only) -->
-                                                @if(auth()->user()->role->name == 'admin' && isset($filterOptions['divisions']))
+                                                @if(auth()->user()->role->name === 'admin')
                                                 <div class="col-md-3 mb-3">
                                                     <label for="division_id" class="form-label">Divisi</label>
                                                     <select class="form-control" id="division_id" name="division_id">
                                                         <option value="">Semua Divisi</option>
-                                                        @foreach($filterOptions['divisions'] as $division)
+                                                        @foreach($options['divisions'] ?? [] as $division)
                                                             <option value="{{ $division->id }}" {{ request('division_id') == $division->id ? 'selected' : '' }}>
-                                                                {{ $division->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                @endif
-                                                
-                                                <!-- Approval Status Filter (Approvers only) -->
-                                                @if(isset($filterOptions['approvalStatuses']))
-                                                <div class="col-md-3 mb-3">
-                                                    <label for="approval_status" class="form-label">Status Approval</label>
-                                                    <select class="form-control" id="approval_status" name="approval_status">
-                                                        <option value="">Semua</option>
-                                                        @foreach($filterOptions['approvalStatuses'] as $value => $label)
-                                                            <option value="{{ $value }}" {{ request('approval_status') == $value ? 'selected' : '' }}>
-                                                                {{ $label }}
+                                                                {{ $division->name }} @if($division->department) - {{ $division->department->name }} @endif
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -114,11 +97,9 @@
                                                 <div class="col-md-3 mb-3">
                                                     <label for="sort_by" class="form-label">Urutkan Berdasarkan</label>
                                                     <select class="form-control" id="sort_by" name="sort_by">
-                                                        @foreach($filterOptions['sortOptions'] as $value => $label)
-                                                            <option value="{{ $value }}" {{ request('sort_by', 'created_at') == $value ? 'selected' : '' }}>
-                                                                {{ $label }}
-                                                            </option>
-                                                        @endforeach
+                                                        <option value="created_at" {{ request('sort_by', 'created_at') == 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
+                                                        <option value="title" {{ request('sort_by') == 'title' ? 'selected' : '' }}>Judul</option>
+                                                        <option value="status" {{ request('sort_by') == 'status' ? 'selected' : '' }}>Status</option>
                                                     </select>
                                                 </div>
                                                 
@@ -270,7 +251,7 @@
                                 <i class="fas fa-file-alt text-secondary" style="font-size: 3rem;"></i>
                                 <h6 class="mt-3">Tidak ada dokumen</h6>
                                 <p class="text-sm text-secondary">Belum ada dokumen yang dibuat.</p>
-                                @if (in_array(auth()->user()->role->name, ['staff', 'manager']))
+                                @if (in_array(auth()->user()->role->name, ['staff', 'section_head']))
                                     <a href="{{ route('documents.create') }}" class="btn btn-primary mt-2">
                                         <i class="fas fa-plus"></i> Buat Dokumen Pertama
                                     </a>
@@ -295,7 +276,7 @@ function clearFilters() {
 
 // Auto-submit form when certain filters change
 document.addEventListener('DOMContentLoaded', function() {
-    const autoSubmitElements = ['status', 'document_type_id', 'division_id', 'approval_status', 'sort_by', 'sort_order', 'per_page'];
+    const autoSubmitElements = ['status', 'document_type_id', 'division_id', 'sort_by', 'sort_order', 'per_page'];
     
     autoSubmitElements.forEach(function(elementId) {
         const element = document.getElementById(elementId);

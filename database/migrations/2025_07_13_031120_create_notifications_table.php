@@ -11,20 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('division_roles', function (Blueprint $table) {
+        Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('division_id');
-            $table->unsignedBigInteger('role_id');
-            $table->boolean('is_primary')->default(false);
+            $table->string('title');
+            $table->text('message');
+            $table->string('link')->nullable();
+            $table->string('type')->default('info'); // info, success, warning, error
+            $table->json('data')->nullable();
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
-            
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('division_id')->references('id')->on('divisions')->onDelete('cascade');
-            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
-            
-            $table->unique(['user_id', 'division_id', 'role_id']);
         });
     }
 
@@ -33,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('division_roles');
+        Schema::dropIfExists('notifications');
     }
 };

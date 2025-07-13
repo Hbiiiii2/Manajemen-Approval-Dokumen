@@ -12,6 +12,7 @@ use App\Models\Approval;
 use App\Models\ApprovalLevel;
 use App\Models\Division;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Notification;
 
 class DocumentController extends Controller
 {
@@ -21,103 +22,53 @@ class DocumentController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        $query = Document::with(['user', 'documentType', 'division', 'approvals']);
         
-        // Base query dengan eager loading
-        $query = Document::with(['user', 'documentType', 'division']);
-        
-        // Role-based filtering
-        if ($user->role->name === 'admin') {
-            // Admin bisa lihat semua dokumen semua divisi
-        } elseif ($user->role->name === 'staff') {
-            // Staff hanya bisa lihat dokumen yang mereka ajukan sendiri
+        // Filter berdasarkan role user
+        if ($user->role->name === 'staff') {
+            // Staff hanya bisa lihat dokumen yang dia buat sendiri
             $query->where('user_id', $user->id);
-        } else {
-            // Dept head, section head, manager hanya bisa lihat dokumen divisinya
+        } elseif ($user->role->name !== 'admin') {
+            // Selain admin & staff (misal section head), hanya lihat dokumen di divisinya
             $query->where('division_id', $user->division_id);
         }
         
-        // Advanced Search & Filter
+        // Filter berdasarkan request
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('title', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%')
-                  ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'like', '%' . $search . '%')
-                               ->orWhere('email', 'like', '%' . $search . '%');
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
                   });
             });
         }
         
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         
-        // Filter by document type
+        if ($request->filled('division_id')) {
+            $query->where('division_id', $request->division_id);
+        }
+        
         if ($request->filled('document_type_id')) {
             $query->where('document_type_id', $request->document_type_id);
         }
         
-        // Filter by division (only for admin)
-        if ($user->role->name === 'admin' && $request->filled('division_id')) {
-            $query->where('division_id', $request->division_id);
+        $documents = $query->orderBy('created_at', 'desc')->paginate(10);
+        
+        // Filter options untuk admin
+        $options = [
+            'documentTypes' => DocumentType::orderBy('name')->get()
+        ];
+        
+        if ($user->role->name === 'admin') {
+            $options['divisions'] = Division::orderBy('name')->get();
         }
         
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-        
-        // Filter by approval status (if user is approver)
-        if (in_array($user->role->name, ['manager', 'section_head', 'dept_head', 'admin']) && $request->filled('approval_status')) {
-            if ($request->approval_status === 'pending_approval') {
-                $query->where('status', 'pending')
-                      ->whereDoesntHave('approvals', function($q) use ($user) {
-                          $q->where('user_id', $user->id);
-                      });
-            } elseif ($request->approval_status === 'approved_by_me') {
-                $query->whereHas('approvals', function($q) use ($user) {
-                    $q->where('user_id', $user->id)
-                      ->where('status', 'approved');
-                });
-            } elseif ($request->approval_status === 'rejected_by_me') {
-                $query->whereHas('approvals', function($q) use ($user) {
-                    $q->where('user_id', $user->id)
-                      ->where('status', 'rejected');
-                });
-            }
-        }
-        
-        // Sorting
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        
-        // Validate sort fields
-        $allowedSortFields = ['title', 'status', 'created_at', 'updated_at'];
-        if (!in_array($sortBy, $allowedSortFields)) {
-            $sortBy = 'created_at';
-        }
-        
-        $query->orderBy($sortBy, $sortOrder);
-        
-        // Pagination
-        $perPage = $request->get('per_page', 10);
-        $allowedPerPage = [5, 10, 25, 50, 100];
-        if (!in_array($perPage, $allowedPerPage)) {
-            $perPage = 10;
-        }
-        
-        $documents = $query->paginate($perPage);
-        
-        // Get filter options for the view
-        $filterOptions = $this->getFilterOptions($user);
-        
-        return view('documents.index', compact('documents', 'filterOptions'));
+        return view('documents.index', compact('documents', 'options'));
     }
     
     /**
@@ -126,7 +77,7 @@ class DocumentController extends Controller
     private function getFilterOptions($user)
     {
         $options = [
-            'documentTypes' => DocumentType::orderBy('name')->get(),
+            'documentTypes' => DocumentType::all(),
             'statuses' => [
                 'pending' => 'Pending',
                 'approved' => 'Approved',
@@ -142,7 +93,7 @@ class DocumentController extends Controller
         
         // Add division options for admin
         if ($user->role->name === 'admin') {
-            $options['divisions'] = Division::where('status', 'active')->orderBy('name')->get();
+            $options['divisions'] = Division::orderBy('name')->get();
         }
         
         // Add approval status options for approvers
@@ -163,17 +114,16 @@ class DocumentController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $userDivisions = collect();
+        $documentTypes = DocumentType::all();
         
+        // Filter divisi berdasarkan role user
         if ($user->role->name === 'admin') {
             // Admin bisa pilih semua divisi
-            $userDivisions = Division::where('status', 'active')->get();
-        } elseif ($user->division_id) {
-            // User lain hanya bisa pilih divisi mereka sendiri
+            $userDivisions = Division::orderBy('name')->get();
+        } else {
+            // Staff dan Section Head hanya bisa pilih divisi mereka sendiri
             $userDivisions = collect([$user->division]);
         }
-        
-        $documentTypes = DocumentType::all();
         
         return view('documents.create', compact('documentTypes', 'userDivisions'));
     }
@@ -185,50 +135,50 @@ class DocumentController extends Controller
     {
         $user = Auth::user();
         
-        $validated = $request->validate([
+        $request->validate([
             'title' => 'required|string|max:255',
             'document_type_id' => 'required|exists:document_types,id',
-            'division_id' => 'required|exists:divisions,id',
             'description' => 'nullable|string',
+            'division_id' => 'required|exists:divisions,id',
             'files.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg|max:20480',
-            'file_descriptions.*' => 'nullable|string|max:500',
+            'file_descriptions.*' => 'nullable|string|max:500'
         ]);
-
-        // Check if user has access to this division
-        if ($user->role->name !== 'admin' && $validated['division_id'] != $user->division_id) {
-            return back()->with('error', 'Anda tidak memiliki akses ke divisi ini.');
+        
+        // Cek akses divisi: staff dan section head hanya bisa pilih divisi mereka
+        if ($user->role->name !== 'admin' && $request->division_id != $user->division_id) {
+            return redirect()->back()->with('error', 'Anda hanya bisa membuat dokumen untuk divisi Anda sendiri.');
         }
-
-        // Create document
+        
         $document = Document::create([
-            'user_id' => Auth::id(),
-            'division_id' => $validated['division_id'],
-            'document_type_id' => $validated['document_type_id'],
-            'title' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'status' => 'pending',
+            'title' => $request->title,
+            'document_type_id' => $request->document_type_id,
+            'division_id' => $request->division_id,
+            'description' => $request->description,
+            'user_id' => $user->id,
+            'status' => 'pending'
         ]);
-
-        // Upload multiple files
+        
+        // Handle file uploads
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $index => $file) {
-                $filePath = $file->store('documents', 'public');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('documents', $fileName, 'public');
+                
                 $description = $request->input("file_descriptions.{$index}");
                 
-                DocumentFile::create([
-                    'document_id' => $document->id,
-                    'file_path' => $filePath,
+                $document->files()->create([
                     'original_name' => $file->getClientOriginalName(),
+                    'file_path' => $filePath,
                     'file_extension' => $file->getClientOriginalExtension(),
                     'file_size' => $file->getSize(),
                     'version' => 1,
                     'status' => 'active',
-                    'description' => $description,
+                    'description' => $description
                 ]);
             }
         }
-
-        return redirect()->route('documents.index')->with('success', 'Dokumen berhasil diajukan!');
+        
+        return redirect()->route('documents.index')->with('success', 'Dokumen berhasil dibuat!');
     }
 
     /**
@@ -270,13 +220,21 @@ class DocumentController extends Controller
     {
         $document = Document::findOrFail($id);
         $user = Auth::user();
-        $userDivisions = collect();
+        
+        // Cek akses: staff dan section head hanya bisa edit dokumen dari divisi mereka
+        if ($user->role->name !== 'admin' && $document->division_id !== $user->division_id) {
+            return redirect()->route('documents.index')->with('error', 'Anda tidak memiliki akses untuk mengedit dokumen ini.');
+        }
+        
+        $documentTypes = DocumentType::all();
+        
+        // Filter divisi berdasarkan role user
         if ($user->role->name === 'admin') {
-            $userDivisions = Division::where('status', 'active')->get();
-        } elseif ($user->division_id) {
+            $userDivisions = Division::orderBy('name')->get();
+        } else {
             $userDivisions = collect([$user->division]);
         }
-        $documentTypes = DocumentType::all();
+        
         return view('documents.edit', compact('document', 'documentTypes', 'userDivisions'));
     }
 
@@ -287,22 +245,31 @@ class DocumentController extends Controller
     {
         $document = Document::findOrFail($id);
         $user = Auth::user();
-        $validated = $request->validate([
+        
+        // Cek akses: staff dan section head hanya bisa update dokumen dari divisi mereka
+        if ($user->role->name !== 'admin' && $document->division_id !== $user->division_id) {
+            return redirect()->route('documents.index')->with('error', 'Anda tidak memiliki akses untuk mengupdate dokumen ini.');
+        }
+        
+        $request->validate([
             'title' => 'required|string|max:255',
             'document_type_id' => 'required|exists:document_types,id',
-            'division_id' => 'required|exists:divisions,id',
             'description' => 'nullable|string',
+            'division_id' => 'required|exists:divisions,id'
         ]);
-        // Check if user has access to this division
-        if ($user->role->name !== 'admin' && $validated['division_id'] != $user->division_id) {
-            return back()->with('error', 'Anda tidak memiliki akses ke divisi ini.');
+        
+        // Cek akses divisi: staff dan section head hanya bisa pilih divisi mereka
+        if ($user->role->name !== 'admin' && $request->division_id != $user->division_id) {
+            return redirect()->back()->with('error', 'Anda hanya bisa mengupdate dokumen untuk divisi Anda sendiri.');
         }
+        
         $document->update([
-            'title' => $validated['title'],
-            'document_type_id' => $validated['document_type_id'],
-            'division_id' => $validated['division_id'],
-            'description' => $validated['description'] ?? null,
+            'title' => $request->title,
+            'document_type_id' => $request->document_type_id,
+            'division_id' => $request->division_id,
+            'description' => $request->description
         ]);
+        
         return redirect()->route('documents.index')->with('success', 'Dokumen berhasil diupdate!');
     }
 
@@ -438,6 +405,29 @@ class DocumentController extends Controller
         if ($level && $level->name === 'Manager' && $status === 'rejected') {
             $document->status = 'rejected';
             $document->save();
+        }
+
+        // Notifikasi ke pengaju dokumen
+        Notification::create([
+            'user_id' => $document->user_id,
+            'title' => 'Status Dokumen Berubah',
+            'message' => 'Status dokumen "' . $document->title . '" menjadi ' . strtoupper($status) . '.',
+            'link' => route('documents.show', $document->id),
+            'type' => $status === 'approved' ? 'success' : 'warning',
+        ]);
+        // Notifikasi ke semua approver lain di divisi (kecuali yang melakukan approval ini)
+        $approverRoles = ['section_head', 'dept_head', 'manager'];
+        $approvers = \App\Models\User::whereIn('role_id', function($q) use ($approverRoles) {
+            $q->select('id')->from('roles')->whereIn('name', $approverRoles);
+        })->where('division_id', $document->division_id)->where('id', '!=', $user->id)->get();
+        foreach ($approvers as $approver) {
+            Notification::create([
+                'user_id' => $approver->id,
+                'title' => 'Status Dokumen Divisi Berubah',
+                'message' => 'Status dokumen "' . $document->title . '" di divisi Anda berubah menjadi ' . strtoupper($status) . '.',
+                'link' => route('documents.show', $document->id),
+                'type' => $status === 'approved' ? 'success' : 'warning',
+            ]);
         }
 
         return redirect()->route('documents.show', $document->id)->with('success', 'Approval berhasil!');

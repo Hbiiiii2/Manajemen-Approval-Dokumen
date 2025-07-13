@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Division;
+use Illuminate\Support\Facades\DB;
 
 class DivisionSeeder extends Seeder
 {
@@ -12,71 +13,16 @@ class DivisionSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('divisions')->truncate();
+        $departments = DB::table('departments')->get()->keyBy('name');
         $divisions = [
-            [
-                'name' => 'Information Technology',
-                'code' => 'IT',
-                'description' => 'Divisi Teknologi Informasi',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Human Resources',
-                'code' => 'HR',
-                'description' => 'Divisi Sumber Daya Manusia',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Finance',
-                'code' => 'FIN',
-                'description' => 'Divisi Keuangan',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Marketing',
-                'code' => 'MKT',
-                'description' => 'Divisi Pemasaran',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Operations',
-                'code' => 'OPS',
-                'description' => 'Divisi Operasional',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Sales',
-                'code' => 'SALES',
-                'description' => 'Divisi Penjualan',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Legal',
-                'code' => 'LEGAL',
-                'description' => 'Divisi Hukum',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Research & Development',
-                'code' => 'RND',
-                'description' => 'Divisi Penelitian dan Pengembangan',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Customer Service',
-                'code' => 'CS',
-                'description' => 'Divisi Layanan Pelanggan',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Quality Assurance',
-                'code' => 'QA',
-                'description' => 'Divisi Jaminan Kualitas',
-                'status' => 'active',
-            ],
+            ['name' => 'Proyek', 'code' => 'DOPR-PRO', 'description' => 'Mengelola perencanaan & pelaksanaan konstruksi', 'department_id' => $departments['OPERASIONAL']->id],
+            ['name' => 'Legal Teknis', 'code' => 'DOPR-LEG', 'description' => 'Mengurus legalitas proyek: IMB, Amdal, SLF, HGB, kontrak', 'department_id' => $departments['OPERASIONAL']->id],
+            ['name' => 'Finance', 'code' => 'DKEU-FIN', 'description' => 'Arus kas, laporan keuangan, perpajakan proyek', 'department_id' => $departments['KEUANGAN']->id],
+            ['name' => 'HRD & GA', 'code' => 'DKEU-HRD', 'description' => 'SDM, kontrak kerja, pengadaan alat dan kendaraan proyek', 'department_id' => $departments['KEUANGAN']->id],
+            ['name' => 'Marketing', 'code' => 'DPMS-MKT', 'description' => 'Promosi produk properti, branding, digital campaign', 'department_id' => $departments['PEMASARAN']->id],
+            ['name' => 'Penjualan', 'code' => 'DPMS-SLS', 'description' => 'Penjualan unit properti, manajemen tim sales & customer service', 'department_id' => $departments['PEMASARAN']->id],
         ];
-
-        foreach ($divisions as $division) {
-            Division::create($division);
-        }
+        DB::table('divisions')->insert($divisions);
     }
 }

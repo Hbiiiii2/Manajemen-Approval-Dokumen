@@ -118,7 +118,7 @@ class ApprovalHistoryController extends Controller
         
         // Add division options for admin
         if ($user->role->name === 'admin') {
-            $options['divisions'] = \App\Models\Division::where('status', 'active')->orderBy('name')->get();
+            $options['divisions'] = \App\Models\Division::orderBy('name')->get();
         }
         
         return $options;

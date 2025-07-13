@@ -17,7 +17,9 @@ class ApprovalHistorySeeder extends Seeder
     {
         // Ambil beberapa dokumen dan user untuk testing
         $documents = Document::take(3)->get();
-        $users = User::whereIn('role_id', [2,3,4])->take(2)->get(); // manager, section_head, admin
+        $users = User::whereHas('role', function($q) {
+            $q->whereIn('name', ['section_head', 'dept_head']);
+        })->take(2)->get();
         $levels = ApprovalLevel::all();
 
         foreach($documents as $document) {

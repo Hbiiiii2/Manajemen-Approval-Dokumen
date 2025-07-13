@@ -1,8 +1,9 @@
 
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main" style="margin-top:64px;">
   <div class="sidenav-header">
     <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-    <a class="align-items-center d-flex m-0 navbar-brand text-wrap" href="{{ url('dashboard') }}">
+    @php $role = auth()->user()->role->name; @endphp
+    <a class="align-items-center d-flex m-0 navbar-brand text-wrap" href="{{ $role == 'staff' ? url('dashboard-staff') : url('dashboard') }}">
         <img src="../assets/img/logo-ct.png" class="navbar-brand-img h-100" alt="...">
         <span class="ms-3 font-weight-bold">Manajemen Approval</span>
     </a>
@@ -11,12 +12,21 @@
   <div class="collapse navbar-collapse  w-auto" id="sidenav-collapse-main">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link {{ (Request::is('dashboard') ? 'active' : '') }}" href="{{ url('dashboard') }}">
-          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="ni ni-chart-bar-32 text-primary"></i>
-          </div>
-          <span class="nav-link-text ms-1">Dashboard</span>
-        </a>
+        @if(auth()->user()->role->name == 'staff')
+          <a class="nav-link {{ (Request::is('dashboard-staff') ? 'active' : '') }}" href="{{ url('dashboard-staff') }}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-single-02 text-primary"></i>
+            </div>
+            <span class="nav-link-text ms-1">Dashboard Staff</span>
+          </a>
+        @else
+          <a class="nav-link {{ (Request::is('dashboard') ? 'active' : '') }}" href="{{ url('dashboard') }}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-chart-bar-32 text-primary"></i>
+            </div>
+            <span class="nav-link-text ms-1">Dashboard Analytics</span>
+          </a>
+        @endif
       </li>
 
       
@@ -42,7 +52,7 @@
       @endif
 
       <!-- Menu untuk Manager -->
-      @if(auth()->user()->role->name == 'manager')
+      @if(auth()->user()->role->name == 'section_head')
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('documents/create') ? 'active' : '') }}" href="{{ url('documents/create') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -77,28 +87,10 @@
       </li>
       @endif
 
-      <!-- Menu untuk Section Head -->
-      @if(auth()->user()->role->name == 'section_head')
-      <li class="nav-item">
-        <a class="nav-link {{ (Request::is('approvals') ? 'active' : '') }}" href="{{ url('approvals') }}">
-          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="ni ni-check-bold text-warning"></i>
-          </div>
-          <span class="nav-link-text ms-1">Approval Dokumen</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {{ (Request::is('approval-history') ? 'active' : '') }}" href="{{ url('approval-history') }}">
-          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="ni ni-time-alarm text-info"></i>
-          </div>
-          <span class="nav-link-text ms-1">History Approval</span>
-        </a>
-      </li>
-      @endif
+
 
       <!-- Menu untuk Dept Head -->
-      @if(auth()->user()->role->name == 'depthead')
+      @if(auth()->user()->role->name == 'dept_head')
       <li class="nav-item">
         <a class="nav-link {{ (Request::is('documents/create') ? 'active' : '') }}" href="{{ url('documents/create') }}">
           <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -191,7 +183,17 @@
           <span class="nav-link-text ms-1">Manajemen Divisi</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('departments') ? 'active' : '') }}" href="{{ url('departments') }}">
+          <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-sitemap text-info"></i>
+          </div>
+          <span class="nav-link-text ms-1">Manajemen Departemen</span>
+        </a>
+      </li>
       @endif
+
+
 
       <li class="nav-item mt-3">
         <a class="nav-link" href="{{ url('/logout') }}">

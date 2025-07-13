@@ -174,35 +174,38 @@
               </div>
               
               @if(in_array(auth()->user()->role->name, ['manager', 'section_head', 'dept_head']) && $document->status == 'pending')
-              <div class="card mt-3">
-                <div class="card-header">
-                  <h6>Action Approval</h6>
-                </div>
-                <div class="card-body">
-                  <form action="{{ route('approvals.approve', $document->id) }}" method="POST" class="mb-3">
-                    @csrf
-                    <div class="form-group">
-                      <label for="comment">Komentar (opsional):</label>
-                      <textarea class="form-control" name="comment" rows="2" placeholder="Masukkan komentar..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success btn-sm w-100">
-                      <i class="fas fa-check"></i> Approve
-                    </button>
-                  </form>
-                  
-                  <form action="{{ route('approvals.reject', $document->id) }}" method="POST">
-                    @csrf
-                    <div class="form-group">
-                      <label for="reject_comment">Alasan Reject:</label>
-                      <textarea class="form-control" name="comment" rows="2" placeholder="Masukkan alasan reject..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-danger btn-sm w-100">
-                      <i class="fas fa-times"></i> Reject
-                    </button>
-                  </form>
-                </div>
-              </div>
-              @endif
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card mb-4 shadow-sm no-hover">
+      <div class="card-header bg-white pb-0">
+        <h6 class="mb-0">Approval Dokumen</h6>
+      </div>
+      <div class="card-body">
+        <form action="{{ route('approvals.approve', $document->id) }}" method="POST" class="mb-3">
+          @csrf
+          <div class="form-group mb-2">
+            <label for="comment">Komentar (opsional):</label>
+            <textarea class="form-control" name="comment" rows="2" placeholder="Masukkan komentar..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-cyan me-2">
+            <i class="fas fa-check"></i> Approve
+          </button>
+        </form>
+        <form action="{{ route('approvals.reject', $document->id) }}" method="POST">
+          @csrf
+          <div class="form-group mb-2">
+            <label for="reject_comment">Alasan Reject:</label>
+            <textarea class="form-control" name="comment" rows="2" placeholder="Masukkan alasan reject..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-yellow">
+            <i class="fas fa-times"></i> Reject
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
             </div>
           </div>
         </div>

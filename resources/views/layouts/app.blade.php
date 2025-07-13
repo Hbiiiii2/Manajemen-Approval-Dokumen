@@ -137,6 +137,30 @@
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{ asset('assets/js/soft-ui-dashboard.min.js?v=1.0.3') }}"></script>
   
+  <!-- Modal Inspect PDF (global) -->
+  <div class="modal fade" id="inspectModal" tabindex="-1" aria-labelledby="inspectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-md-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="inspectModalLabel">Preview File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="inspectModalBody" style="min-height:70vh;display:flex;align-items:center;justify-content:center;">
+          <div class="text-center text-muted">Memuat preview dokumen...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+  function showInspectModal(fileUrl, fileName) {
+    var modal = new bootstrap.Modal(document.getElementById('inspectModal'));
+    var body = document.getElementById('inspectModalBody');
+    var title = document.getElementById('inspectModalLabel');
+    title.innerText = 'Preview File: ' + fileName;
+    body.innerHTML = `<iframe src="${fileUrl}#toolbar=1&navpanes=1&scrollbar=1" width="100%" height="600px" style="border:none;max-width:100%;"></iframe>`;
+    modal.show();
+  }
+  </script>
   <!-- Custom JavaScript for Profile Dropdown -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {

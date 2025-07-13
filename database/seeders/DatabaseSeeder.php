@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Database\Seeders\DemoOrgSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,12 +16,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
-            DivisionSeeder::class,
             ApprovalLevelSeeder::class,
-            UserSeeder::class,
             SimpleAdminSeeder::class,
             DocumentTypeSeeder::class,
-            DocumentSeeder::class,
         ]);
     }
 }

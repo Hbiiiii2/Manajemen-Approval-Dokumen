@@ -18,7 +18,9 @@ class ApprovalSeeder extends Seeder
     public function run()
     {
         $documents = Document::whereIn('status', ['approved', 'rejected'])->get();
-        $users = User::whereIn('role_id', [2, 3])->get(); // manager dan section_head
+        $users = User::whereHas('role', function($q) {
+            $q->whereIn('name', ['section_head', 'dept_head']);
+        })->get();
         $approvalLevels = ApprovalLevel::all();
         
         if ($documents->isEmpty()) {

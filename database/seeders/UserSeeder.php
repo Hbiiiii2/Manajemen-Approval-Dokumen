@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
         // Get role IDs
         $staffRole = $roles->where('name', 'staff')->first();
         $sectionHeadRole = $roles->where('name', 'section_head')->first();
-        $deptHeadRole = $roles->where('name', 'depthead')->first();
+        $deptHeadRole = $roles->where('name', 'dept_head')->first();
         $adminRole = $roles->where('name', 'admin')->first();
         
         if (!$staffRole || !$sectionHeadRole || !$deptHeadRole || !$adminRole) {

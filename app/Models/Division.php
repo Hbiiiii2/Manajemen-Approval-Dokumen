@@ -13,8 +13,13 @@ class Division extends Model
         'name',
         'code',
         'description',
-        'status',
+        'department_id'
     ];
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     public function users()
     {
@@ -29,10 +34,5 @@ class Division extends Model
     public function divisionRoles()
     {
         return $this->hasMany(DivisionRole::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
     }
 }

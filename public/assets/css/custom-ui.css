@@ -6,6 +6,7 @@ body {
 .card {
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(22,199,249,0.06);
+  transition: none !important;
 }
 .table th, .table td {
   vertical-align: middle !important;
@@ -21,7 +22,7 @@ input, select, textarea {
   font-weight: 600;
   letter-spacing: 0.5px;
   border-radius: 16px;
-  transition: 0.2s;
+  transition: none !important;
 }
 .btn-cyan {
   background: #16c7f9 !important;
@@ -31,12 +32,13 @@ input, select, textarea {
   border-radius: 16px;
   padding: 8px 24px;
   box-shadow: 0 2px 8px rgba(22,199,249,0.08);
-  transition: 0.2s;
+  transition: none !important;
 }
 .btn-cyan:hover, .btn-cyan:focus {
   background: #0bb3e3 !important;
   color: #fff !important;
-  opacity: 0.95;
+  opacity: 1;
+  transition: none !important;
 }
 .btn-yellow {
   background: #ffd23b !important;
@@ -46,12 +48,13 @@ input, select, textarea {
   border-radius: 16px;
   padding: 8px 24px;
   box-shadow: 0 2px 8px rgba(255,210,59,0.08);
-  transition: 0.2s;
+  transition: none !important;
 }
 .btn-yellow:hover, .btn-yellow:focus {
   background: #ffc107 !important;
   color: #fff !important;
-  opacity: 0.95;
+  opacity: 1;
+  transition: none !important;
 }
 .badge {
   border-radius: 12px;
@@ -82,7 +85,7 @@ input, select, textarea {
   font-weight: 600;
   border-radius: 12px;
   margin-bottom: 8px;
-  transition: 0.2s;
+  transition: none !important;
 }
 .sidebar .nav-link.active, .sidebar .nav-link:hover {
   background: #16c7f9;
@@ -98,10 +101,11 @@ input, select, textarea {
     padding: 12px 0;
   }
 }
-/* Animasi hover card */
-.card:hover {
-  box-shadow: 0 4px 24px rgba(22,199,249,0.13);
-  transform: translateY(-2px) scale(1.01);
+/* Hapus animasi hover card */
+.card:not(.no-hover):hover {
+  box-shadow: 0 2px 16px rgba(22,199,249,0.06);
+  transform: none !important;
+  transition: none !important;
 }
 /* Breadcrumb */
 .breadcrumb {
