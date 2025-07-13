@@ -14,7 +14,6 @@ class Document extends Model
         'division_id',
         'document_type_id',
         'title',
-        'file_path',
         'description',
         'status',
     ];
@@ -37,5 +36,52 @@ class Document extends Model
     public function approvals()
     {
         return $this->hasMany(Approval::class);
+    }
+
+    // New relationships for multi-file and comments
+    public function files()
+    {
+        return $this->hasMany(DocumentFile::class);
+    }
+
+    public function activeFiles()
+    {
+        return $this->hasMany(DocumentFile::class)->where('status', 'active');
+    }
+
+    public function latestFile()
+    {
+        return $this->hasOne(DocumentFile::class)->where('status', 'active')->latest('version');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(DocumentComment::class);
+    }
+
+    public function topLevelComments()
+    {
+        return $this->hasMany(DocumentComment::class)->whereNull('parent_id')->with('user', 'replies.user');
+    }
+
+    // Helper methods
+    public function getLatestVersionAttribute()
+    {
+        return $this->files()->max('version') ?? 0;
+    }
+
+    public function getNextVersionAttribute()
+    {
+        return $this->latest_version + 1;
+    }
+
+    public function hasFiles()
+    {
+        return $this->files()->count() > 0;
+    }
+
+    public function getMainFileAttribute()
+    {
+        return $this->files()->where('status', 'active')->latest('version')->first();
     }
 }

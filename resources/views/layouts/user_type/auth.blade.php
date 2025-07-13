@@ -2,6 +2,7 @@
 
 @section('auth')
 
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-ui.css') }}">
 
     @if(\Request::is('static-sign-up')) 
         @include('layouts.navbars.guest.nav')

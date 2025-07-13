@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Document;
+use App\Models\DocumentFile;
 use App\Models\User;
 use App\Models\DocumentType;
 use App\Models\Division;
@@ -197,11 +198,29 @@ class DocumentSeeder extends Seeder
                     'document_type_id' => $documentType->id,
                     'title' => $title,
                     'description' => $faker->paragraph(3),
-                    'file_path' => 'documents/sample.pdf', // Placeholder file path
                     'status' => $status = ['pending', 'approved', 'rejected'][rand(0, 2)],
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
                 ]);
+
+                // Create sample file for the document
+                $fileExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+                $fileExtension = $fileExtensions[array_rand($fileExtensions)];
+                $fileName = strtolower(str_replace(' ', '_', $title)) . '.' . $fileExtension;
+                
+                DocumentFile::create([
+                    'document_id' => $doc->id,
+                    'file_path' => 'documents/sample.' . $fileExtension,
+                    'original_name' => $fileName,
+                    'file_extension' => $fileExtension,
+                    'file_size' => rand(100000, 5000000), // 100KB to 5MB
+                    'version' => 1,
+                    'status' => 'active',
+                    'description' => $faker->sentence(),
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+
                 // Tambahkan approval jika status approved/rejected
                 if (in_array($doc->status, ['approved', 'rejected'])) {
                     $approver = $divisionUsers->random();

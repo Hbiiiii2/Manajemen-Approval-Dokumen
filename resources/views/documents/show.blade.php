@@ -70,112 +70,69 @@
                 </div>
               </div>
               
-              @if($document->file_path)
+              <!-- Multi-file display section -->
+              @if($document->files->count() > 0)
               <div class="form-group">
                 <label class="form-control-label">File Dokumen</label>
-                <div class="mb-3">
-                  <a href="{{ asset('storage/' . $document->file_path) }}" target="_blank" class="btn btn-info btn-sm">
-                    <i class="fas fa-download"></i> Download File
-                  </a>
-                  <button type="button" class="btn btn-primary btn-sm" onclick="togglePdfViewer()">
-                    <i class="fas fa-eye"></i> Lihat PDF
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover align-middle shadow-sm">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center">Versi</th>
+                        <th>Nama File</th>
+                        <th>Ukuran</th>
+                        <th>Deskripsi</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach($document->files->sortByDesc('version') as $file)
+                      <tr>
+                        <td class="text-center">
+                          <span class="badge bg-gradient-info px-3 py-2 fs-6">v{{ $file->version }}</span>
+                        </td>
+                        <td>{{ $file->original_name }}</td>
+                        <td>{{ $file->file_size_formatted }}</td>
+                        <td>
+                          @if($file->description)
+                            {{ $file->description }}
+                          @else
+                            <span class="text-muted">-</span>
+                          @endif
+                        </td>
+                        <td class="text-center">
+                          @if($file->status == 'active')
+                            <span class="badge bg-success bg-opacity-75 px-3 py-2">ACTIVE</span>
+                          @else
+                            <span class="badge bg-secondary bg-opacity-50 px-3 py-2">ARCHIVED</span>
+                          @endif
+                        </td>
+                        <td class="text-center">
+                          <a href="{{ route('documents.files.edit', $file->id) }}" class="btn btn-yellow btn-sm me-1" title="Edit">
+                            <i class="fas fa-edit"></i> <span class="d-none d-md-inline">Edit</span>
+                          </a>
+                          <a href="{{ route('documents.download', $file->id) }}" class="btn btn-cyan btn-sm me-1" title="Download">
+                            <i class="fas fa-download"></i> <span class="d-none d-md-inline">Download</span>
+                          </a>
+                          @if($file->status == 'active')
+                          <button type="button" class="btn btn-cyan btn-sm" title="Preview" onclick="previewFile('{{ $file->id }}', '{{ $file->file_extension }}', '{{ asset('storage/' . $file->file_path) }}')">
+                            <i class="fas fa-eye"></i> <span class="d-none d-md-inline">Preview</span>
+                          </button>
+                          @endif
+                        </td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+                @if($document->user_id == auth()->id() || auth()->user()->role->name == 'admin')
+                <div class="mt-3">
+                  <button type="button" class="btn btn-cyan btn-sm" data-bs-toggle="modal" data-bs-target="#uploadVersionModal">
+                    <i class="fas fa-upload"></i> Upload Versi Baru
                   </button>
                 </div>
-                
-                <!-- PDF Viewer -->
-                <div id="pdfViewer" class="mt-3" style="display: none;">
-                  <div class="card shadow-lg border-0">
-                    <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center py-3">
-                      <div class="d-flex align-items-center">
-                        <i class="fas fa-eye me-2"></i>
-                        <h6 class="mb-0 fw-bold">Preview Dokumen</h6>
-                        <span class="badge bg-light text-dark ms-2">{{ strtoupper($fileExtension ?? 'PDF') }}</span>
-                      </div>
-                      <button type="button" class="btn btn-light btn-sm" onclick="togglePdfViewer()" title="Tutup Preview">
-                        <i class="fas fa-times"></i>
-                      </button>
-                    </div>
-                    <div class="card-body p-0 position-relative">
-                      @php
-                        $fileExtension = strtolower(pathinfo($document->file_path, PATHINFO_EXTENSION));
-                      @endphp
-                      
-                      @if($fileExtension == 'pdf')
-                        <!-- PDF Viewer -->
-                        <div class="pdf-container">
-                          <iframe src="{{ asset('storage/' . $document->file_path) }}#toolbar=1&navpanes=1&scrollbar=1" 
-                                  width="100%" height="700px" 
-                                  style="border: none; border-radius: 0 0 0.5rem 0.5rem;"
-                                  allowfullscreen>
-                            <div class="text-center p-5">
-                              <i class="fas fa-file-pdf fa-4x text-danger mb-3"></i>
-                              <p class="text-muted">Browser Anda tidak mendukung PDF viewer.</p>
-                              <a href="{{ asset('storage/' . $document->file_path) }}" target="_blank" class="btn btn-primary">
-                                <i class="fas fa-download"></i> Download PDF
-                              </a>
-                            </div>
-                          </iframe>
-                        </div>
-                      @elseif(in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif']))
-                        <!-- Image Viewer -->
-                        <div class="image-viewer-container">
-                          <div class="text-center p-4 bg-light">
-                            <div class="image-wrapper position-relative">
-                              <img src="{{ asset('storage/' . $document->file_path) }}" 
-                                   class="img-fluid rounded shadow-sm" 
-                                   style="max-height: 600px; max-width: 100%;"
-                                   alt="Preview dokumen"
-                                   id="previewImage">
-                              <div class="image-overlay">
-                                <button class="btn btn-light btn-sm" onclick="zoomIn()" title="Zoom In">
-                                  <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="btn btn-light btn-sm" onclick="zoomOut()" title="Zoom Out">
-                                  <i class="fas fa-search-minus"></i>
-                                </button>
-                                <button class="btn btn-light btn-sm" onclick="resetZoom()" title="Reset Zoom">
-                                  <i class="fas fa-undo"></i>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      @else
-                        <!-- Other file types -->
-                        <div class="text-center p-5 bg-light">
-                          <div class="file-icon-wrapper mb-3">
-                            @if(in_array($fileExtension, ['doc', 'docx']))
-                              <i class="fas fa-file-word fa-4x text-primary"></i>
-                            @elseif(in_array($fileExtension, ['xls', 'xlsx']))
-                              <i class="fas fa-file-excel fa-4x text-success"></i>
-                            @elseif(in_array($fileExtension, ['ppt', 'pptx']))
-                              <i class="fas fa-file-powerpoint fa-4x text-warning"></i>
-                            @else
-                              <i class="fas fa-file-alt fa-4x text-muted"></i>
-                            @endif
-                          </div>
-                          <h6 class="text-muted mb-2">Preview tidak tersedia</h6>
-                          <p class="text-muted small mb-3">File tipe {{ strtoupper($fileExtension) }} tidak dapat ditampilkan dalam preview</p>
-                          <a href="{{ asset('storage/' . $document->file_path) }}" target="_blank" class="btn btn-primary">
-                            <i class="fas fa-download"></i> Download File
-                          </a>
-                        </div>
-                      @endif
-                    </div>
-                    <div class="card-footer bg-light py-2">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">
-                          <i class="fas fa-info-circle me-1"></i>
-                          File: {{ basename($document->file_path) }}
-                        </small>
-                        <small class="text-muted">
-                          <i class="fas fa-clock me-1"></i>
-                          {{ $document->created_at->format('d/m/Y H:i') }}
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                @endif
               </div>
               @endif
             </div>
@@ -252,163 +209,297 @@
       </div>
     </div>
   </div>
+
+  <!-- Comments Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h6>Komentar & Diskusi</h6>
+        </div>
+        <div class="card-body">
+          <!-- Add Comment Form -->
+          <form action="{{ route('documents.comments.add', $document->id) }}" method="POST" class="mb-4">
+            @csrf
+            <div class="row">
+              <div class="col-md-8">
+                <div class="form-group">
+                  <textarea class="form-control" name="comment" rows="3" placeholder="Tulis komentar Anda..." required></textarea>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <select class="form-control" name="type" required>
+                    <option value="">Pilih Tipe</option>
+                    <option value="general">Umum</option>
+                    <option value="approval">Approval</option>
+                    <option value="revision">Revisi</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                  <i class="fas fa-paper-plane"></i> Kirim Komentar
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Comments List -->
+          <div class="comments-container">
+            @if($document->topLevelComments->count() > 0)
+              @foreach($document->topLevelComments as $comment)
+              <div class="comment-item mb-3">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <div class="avatar-sm bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center">
+                      <span class="text-white fw-bold">{{ substr($comment->user->name, 0, 1) }}</span>
+                    </div>
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h6 class="mb-1">{{ $comment->user->name }}</h6>
+                        <small class="text-muted">{{ $comment->time_ago }}</small>
+                        <span class="badge badge-sm bg-gradient-{{ $comment->type == 'approval' ? 'success' : ($comment->type == 'revision' ? 'warning' : 'info') }} ms-2">
+                          {{ ucfirst($comment->type) }}
+                        </span>
+                      </div>
+                    </div>
+                    <p class="mb-2">{{ $comment->comment }}</p>
+                    
+                    <!-- Reply button -->
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showReplyForm({{ $comment->id }})">
+                      <i class="fas fa-reply"></i> Balas
+                    </button>
+                    
+                    <!-- Reply form (hidden by default) -->
+                    <div id="reply-form-{{ $comment->id }}" class="mt-2" style="display: none;">
+                      <form action="{{ route('documents.comments.add', $document->id) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                        <input type="hidden" name="type" value="general">
+                        <div class="input-group">
+                          <textarea class="form-control" name="comment" rows="2" placeholder="Tulis balasan..." required></textarea>
+                          <button type="submit" class="btn btn-primary btn-sm">Kirim</button>
+                        </div>
+                      </form>
+                    </div>
+                    
+                    <!-- Replies -->
+                    @if($comment->replies->count() > 0)
+                      <div class="replies mt-2">
+                        @foreach($comment->replies as $reply)
+                        <div class="reply-item ms-4 mt-2 p-2 bg-light rounded">
+                          <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                              <h6 class="mb-1 small">{{ $reply->user->name }}</h6>
+                              <small class="text-muted">{{ $reply->time_ago }}</small>
+                            </div>
+                          </div>
+                          <p class="mb-0 small">{{ $reply->comment }}</p>
+                        </div>
+                        @endforeach
+                      </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+              @endforeach
+            @else
+              <p class="text-muted text-center">Belum ada komentar</p>
+            @endif
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Version Modal -->
+<div class="modal fade" id="uploadVersionModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Upload Versi Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ route('documents.upload-version', $document->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="modal-body">
+          <div class="form-group">
+            <label>File Baru</label>
+            <input type="file" class="form-control" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required>
+          </div>
+          <div class="form-group">
+            <label>Deskripsi (opsional)</label>
+            <textarea class="form-control" name="description" rows="3" placeholder="Jelaskan perubahan pada versi ini..."></textarea>
+          </div>
+          <div class="alert alert-info">
+            <small>
+              <i class="fas fa-info-circle"></i>
+              Versi baru akan menjadi v{{ $document->next_version }}
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Upload Versi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- File Preview Modal -->
+<div class="modal fade" id="filePreviewModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Preview File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="filePreviewContent">
+        <!-- Content will be loaded here -->
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>
-.pdf-container {
-  position: relative;
-  overflow: hidden;
+.comment-item {
+  border-left: 3px solid #e9ecef;
+  padding-left: 15px;
 }
 
-.image-viewer-container {
-  position: relative;
+.reply-item {
+  border-left: 2px solid #dee2e6;
 }
 
-.image-wrapper {
-  display: inline-block;
-  position: relative;
-  max-width: 100%;
-}
-
-.image-overlay {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  gap: 5px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.image-wrapper:hover .image-overlay {
-  opacity: 1;
-}
-
-.image-overlay .btn {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.image-overlay .btn:hover {
-  background: rgba(255, 255, 255, 1);
-  transform: scale(1.05);
-}
-
-#previewImage {
-  transition: transform 0.3s ease;
-  cursor: zoom-in;
-}
-
-.file-icon-wrapper {
-  display: inline-block;
-  padding: 20px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.card.shadow-lg {
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
 }
 
 .bg-gradient-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 }
 
-.card-header.bg-gradient-primary {
-  border-bottom: none;
+.bg-gradient-success {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
 }
 
-.card-footer {
-  border-top: 1px solid rgba(0, 0, 0, 0.125);
+.bg-gradient-warning {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
 }
 
-/* Animation for viewer */
-#pdfViewer {
-  animation: slideDown 0.3s ease-out;
+.bg-gradient-info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.table thead th {
+  font-weight: 600;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
 }
-
-/* Responsive adjustments */
+.table td, .table th {
+  vertical-align: middle !important;
+}
+.badge.bg-gradient-info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.btn-success {
+  background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%) !important;
+  border: none;
+  color: #fff;
+}
+.btn-info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+  border: none;
+  color: #fff;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none;
+  color: #fff;
+}
+.btn:hover, .btn:focus {
+  opacity: 0.9;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.btn-cyan {
+  background: #16c7f9 !important;
+  color: #fff !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 24px;
+  box-shadow: 0 2px 8px rgba(22,199,249,0.08);
+  transition: 0.2s;
+}
+.btn-cyan:hover, .btn-cyan:focus {
+  background: #0bb3e3 !important;
+  color: #fff !important;
+  opacity: 0.95;
+}
+.btn-yellow {
+  background: #ffd23b !important;
+  color: #fff !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 24px;
+  box-shadow: 0 2px 8px rgba(255,210,59,0.08);
+  transition: 0.2s;
+}
+.btn-yellow:hover, .btn-yellow:focus {
+  background: #ffc107 !important;
+  color: #fff !important;
+  opacity: 0.95;
+}
 @media (max-width: 768px) {
-  .image-overlay {
-    position: static;
-    justify-content: center;
-    margin-top: 10px;
-    opacity: 1;
-  }
-  
-  .image-wrapper {
-    display: block;
+  .table-responsive {
+    overflow-x: auto;
   }
 }
 </style>
 
 <script>
-let currentZoom = 1;
-const zoomStep = 0.2;
-const maxZoom = 3;
-const minZoom = 0.5;
-
-function togglePdfViewer() {
-  const viewer = document.getElementById('pdfViewer');
-  if (viewer.style.display === 'none') {
-    viewer.style.display = 'block';
-    // Scroll to viewer with smooth animation
-    setTimeout(() => {
-      viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+function showReplyForm(commentId) {
+  const replyForm = document.getElementById(`reply-form-${commentId}`);
+  if (replyForm.style.display === 'none') {
+    replyForm.style.display = 'block';
   } else {
-    viewer.style.display = 'none';
+    replyForm.style.display = 'none';
   }
 }
 
-function zoomIn() {
-  const image = document.getElementById('previewImage');
-  if (image && currentZoom < maxZoom) {
-    currentZoom += zoomStep;
-    image.style.transform = `scale(${currentZoom})`;
+function previewFile(fileId, extension, fileUrl) {
+  const modal = new bootstrap.Modal(document.getElementById('filePreviewModal'));
+  const content = document.getElementById('filePreviewContent');
+  
+  // Show loading
+  content.innerHTML = '<div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Loading...</p></div>';
+  modal.show();
+  
+  // Load content based on file type
+  if (extension.toLowerCase() === 'pdf') {
+    content.innerHTML = `<iframe src="${fileUrl}" width="100%" height="600px" style="border: none;"></iframe>`;
+  } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension.toLowerCase())) {
+    content.innerHTML = `<img src="${fileUrl}" class="img-fluid" alt="Preview">`;
+  } else {
+    content.innerHTML = `
+      <div class="text-center p-5">
+        <i class="fas fa-file fa-4x text-muted mb-3"></i>
+        <p class="text-muted">Preview tidak tersedia untuk file tipe ${extension.toUpperCase()}</p>
+        <a href="${fileUrl}" class="btn btn-primary" target="_blank">
+          <i class="fas fa-download"></i> Download File
+        </a>
+      </div>
+    `;
   }
 }
-
-function zoomOut() {
-  const image = document.getElementById('previewImage');
-  if (image && currentZoom > minZoom) {
-    currentZoom -= zoomStep;
-    image.style.transform = `scale(${currentZoom})`;
-  }
-}
-
-function resetZoom() {
-  const image = document.getElementById('previewImage');
-  if (image) {
-    currentZoom = 1;
-    image.style.transform = 'scale(1)';
-  }
-}
-
-// Add click to zoom functionality for images
-document.addEventListener('DOMContentLoaded', function() {
-  const image = document.getElementById('previewImage');
-  if (image) {
-    image.addEventListener('click', function() {
-      if (currentZoom === 1) {
-        zoomIn();
-      } else {
-        resetZoom();
-      }
-    });
-  }
-});
 </script>
 @endsection 

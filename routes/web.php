@@ -74,6 +74,15 @@ Route::group(['middleware' => 'auth'], function () {
     // Document routes
     Route::resource('documents', DocumentController::class);
     Route::post('documents/{document}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
+    
+    // Document comments and file management
+    Route::post('documents/{document}/comments', [DocumentController::class, 'addComment'])->name('documents.comments.add');
+    Route::post('documents/{document}/upload-version', [DocumentController::class, 'uploadNewVersion'])->name('documents.upload-version');
+    Route::get('documents/download/{file}', [DocumentController::class, 'download'])->name('documents.download');
+
+    // Document file edit routes
+    Route::get('documents/files/{file}/edit', [App\Http\Controllers\DocumentController::class, 'editFile'])->name('documents.files.edit');
+    Route::put('documents/files/{file}', [App\Http\Controllers\DocumentController::class, 'updateFile'])->name('documents.files.update');
 
     // Approval routes
     Route::get('approvals', [App\Http\Controllers\ApprovalController::class, 'index'])->name('approvals.index');

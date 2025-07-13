@@ -69,10 +69,28 @@
               </div>
             </div>
 
+            <!-- Multi-file upload section -->
             <div class="form-group">
-              <label for="file" class="form-control-label">File Dokumen</label>
-              <input type="file" class="form-control" id="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
-              <small class="form-text text-muted">Format yang didukung: PDF, DOC, DOCX, XLS, XLSX (Max: 5MB)</small>
+              <label class="form-control-label">File Dokumen</label>
+              <div id="file-upload-container">
+                <div class="file-input-group mb-3">
+                  <div class="row">
+                    <div class="col-md-8">
+                      <input type="file" class="form-control" name="files[]" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required>
+                    </div>
+                    <div class="col-md-4">
+                      <input type="text" class="form-control" name="file_descriptions[]" placeholder="Deskripsi file (opsional)">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mt-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="add-file-btn">
+                  <i class="fas fa-plus"></i> Tambah File
+                </button>
+                <small class="form-text text-muted">Format yang didukung: PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, JPEG (Max: 20MB per file)</small>
+              </div>
             </div>
 
             <div class="d-flex justify-content-end">
@@ -85,4 +103,48 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('file-upload-container');
+    const addBtn = document.getElementById('add-file-btn');
+    let fileCount = 1;
+
+    addBtn.addEventListener('click', function() {
+        fileCount++;
+        const newGroup = document.createElement('div');
+        newGroup.className = 'file-input-group mb-3';
+        newGroup.innerHTML = `
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="file" class="form-control" name="files[]" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="file_descriptions[]" placeholder="Deskripsi file (opsional)">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-file-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(newGroup);
+        
+        // Add remove functionality
+        newGroup.querySelector('.remove-file-btn').addEventListener('click', function() {
+            container.removeChild(newGroup);
+        });
+    });
+
+    // Add remove functionality to first file input
+    document.querySelector('.remove-file-btn')?.addEventListener('click', function() {
+        if (fileCount > 1) {
+            container.removeChild(this.closest('.file-input-group'));
+            fileCount--;
+        }
+    });
+});
+</script>
 @endsection 

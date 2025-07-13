@@ -1,0 +1,112 @@
+body {
+  font-family: 'Inter', 'Nunito', Arial, sans-serif;
+  background: #f8f9fb;
+  color: #222;
+}
+.card {
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(22,199,249,0.06);
+}
+.table th, .table td {
+  vertical-align: middle !important;
+}
+.table-hover tbody tr:hover {
+  background: #f1f7fa;
+}
+input, select, textarea {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 4px rgba(22,199,249,0.04);
+}
+.btn {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 16px;
+  transition: 0.2s;
+}
+.btn-cyan {
+  background: #16c7f9 !important;
+  color: #fff !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 24px;
+  box-shadow: 0 2px 8px rgba(22,199,249,0.08);
+  transition: 0.2s;
+}
+.btn-cyan:hover, .btn-cyan:focus {
+  background: #0bb3e3 !important;
+  color: #fff !important;
+  opacity: 0.95;
+}
+.btn-yellow {
+  background: #ffd23b !important;
+  color: #fff !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 24px;
+  box-shadow: 0 2px 8px rgba(255,210,59,0.08);
+  transition: 0.2s;
+}
+.btn-yellow:hover, .btn-yellow:focus {
+  background: #ffc107 !important;
+  color: #fff !important;
+  opacity: 0.95;
+}
+.badge {
+  border-radius: 12px;
+  font-size: 0.95em;
+  font-weight: 600;
+  padding: 6px 16px;
+}
+.badge-pending {
+  background: #ffd23b;
+  color: #fff;
+}
+.badge-approved {
+  background: #38ef7d;
+  color: #fff;
+}
+.badge-rejected {
+  background: #f5576c;
+  color: #fff;
+}
+.sidebar {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(22,199,249,0.06);
+  padding: 24px 0;
+}
+.sidebar .nav-link {
+  color: #222;
+  font-weight: 600;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  transition: 0.2s;
+}
+.sidebar .nav-link.active, .sidebar .nav-link:hover {
+  background: #16c7f9;
+  color: #fff;
+}
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .sidebar {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 12px 0;
+  }
+}
+/* Animasi hover card */
+.card:hover {
+  box-shadow: 0 4px 24px rgba(22,199,249,0.13);
+  transform: translateY(-2px) scale(1.01);
+}
+/* Breadcrumb */
+.breadcrumb {
+  background: transparent;
+  font-size: 1.05em;
+  font-weight: 500;
+  margin-bottom: 18px;
+} 
